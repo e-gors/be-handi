@@ -23,8 +23,8 @@ class CreateProfilesTable extends Migration
             $table->string('last_name');
             $table->string('gender');
             $table->string('address');
+            $table->string('rate')->nullable();
             $table->string('availability')->nullable();
-            $table->string('progress')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

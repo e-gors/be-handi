@@ -3,29 +3,31 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NodeTrait;
 
 class Skill extends Model
 {
+
+    use NodeTrait;
+
     protected $fillable = [
-        'user_id',
         'name',
-    ];
-    
-    protected $casts = [
-        'name' => 'array'
+        'parent_id'
     ];
 
-    public function getArrayColumnAttribute($value)
+
+    public function users()
     {
-        return unserialize($value);
+        return $this->belongsToMany(User::class);
     }
 
-    public function setArrayColumnAttribute($value)
+    public function parent()
     {
-        $this->attributes['name'] = serialize($value);
+        return $this->belongsTo(Skill::class, 'parent_id');
     }
 
-    public function user(){
-        return $this->belongsTo(User::class);
+    public function children()
+    {
+        return $this->hasMany(Skill::class, 'parent_id');
     }
 }

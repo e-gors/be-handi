@@ -3,16 +3,20 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NodeTrait;
 
 class Category extends Model
 {
+    use NodeTrait;
+
     protected $fillable = [
-        'name', 'slug', 'description', 'parent_id'
+        'name', 'parent_id'
     ];
 
-    public function user()
+    
+    public function users()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsToMany(User::class);
     }
 
     public function parent()

@@ -14,20 +14,19 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//profiles(worker)
-Route::get('workers', 'ProfileController@worker');
-
-//Public Routes
+// Public Routes
+Route::get('posts', 'PostController@index');
 Route::post('login', 'UserController@login');
 Route::post('join-us/{role}', 'UserController@store');
+Route::get('verify-email/{id}', 'UserController@confirmedUser');
+Route::get('categories', 'CategoryController@categories');
+Route::get('skills', 'SkillController@skills');
+Route::get('workers', 'ProfileController@index');
 
 //Private Routes
 Route::middleware('auth:api')->group(function () {
-    //users
     Route::get('get-user', 'UserController@getUser');
-
-    //register user
-    //confirm user
-    Route::get('confirmed/{id}', 'UserController@confirmedUser');
-
+    Route::post('post-jobs/{id}', 'PostController@post');
+    Route::post('upload/bg-image', 'ProfileController@uploadBGImage');
+    Route::post('upload/profile-image', 'ProfileController@uploadProfileImage');
 });

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProfileCompletenessesTable extends Migration
+class CreateCategoryUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateProfileCompletenessesTable extends Migration
      */
     public function up()
     {
-        Schema::create('profile_completenesses', function (Blueprint $table) {
+        Schema::create('category_user', function (Blueprint $table) {
             $table->id();
-            $table->string('section');
-            $table->integer('completeness');
-            $table->boolean('status');
-            $table->text('next_steps')->nullable();
+            $table->foreignId('user_id');
+            $table->foreignId('category_id');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateProfileCompletenessesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profile_completenesses');
+        Schema::dropIfExists('category_user');
     }
 }

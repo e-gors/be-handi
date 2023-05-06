@@ -32,6 +32,6 @@ class ConfirmRegistration extends Mailable
     public function build()
     {
         // return $this->markdown('emails.registration.confirm')->subject('Handi Registration Confirmation');
-        return $this->markdown('emails.registration.confirm', ['user' => $this->user])->subject('Handi Registration Confirmation');
+        return $this->markdown('emails.registration.confirm', ['user' => $this->user])->subject('Handi Email Verification');
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCategoriesTable extends Migration
+class CreateShortlistsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateCategoriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('shortlists', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->unsignedBigInteger('parent_id')->nullable();
-            $table->unsignedInteger('_lft');
-            $table->unsignedInteger('_rgt');
+            $table->foreignId('user_id');
+            $table->foreignId('profile_id')->nullable();
+            $table->foreignId('post_id')->nullable();
+            $table->string('favorite_type');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -30,6 +31,6 @@ class CreateCategoriesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('shortlists');
     }
 }

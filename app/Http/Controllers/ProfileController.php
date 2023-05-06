@@ -6,80 +6,121 @@ use App\Job;
 use App\User;
 use App\Skill;
 use App\Profile;
-use App\Http\Resources\UserResource;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    public function store(Request $request)
+    public function index(Request $request)
     {
+        $search = $request->search ? $request->search : null;
+        $query = User::query();
 
-        $image = $request->file('image');
-        $filename = time() . '_' . $image->getClientOriginalName();
-        $path = $image->storeAs('public/images', $filename);
-        $imageUrl = asset('storage/images/' . $filename);
+        $query->where('role', 'Worker')->get();
 
-
-        $user = auth()->user();
-
-        $data = json_decode($request->basicInfo, true);
-
-        User::find($user->id)->update([
-            'role' => $request->selectedRole,
-            'contact_number' => $data['values']['contact_number'],
-        ]);
-
-        $newProfile = Profile::create([
-            'user_id' => $user->id,
-            'background' => $data['values']['background'],
-            'profile_url' => $imageUrl,
-            'first_name' => $user->first_name,
-            'last_name' => $user->last_name,
-            'gender' => $data['values']['gender'],
-            'address' => $user->address ? $user->address : 'Hilongos, Leyte',
-        ]);
-
-        $newSkills = new Skill;
-        $newSkills->user_id = $user->id;
-        $newSkills->array_column = $request->skills;
-        $newSkills->save();
-
-        $newJobs = new Job;
-        $newJobs->user_id = $user->id;
-        $newJobs->array_column = $request->jobs;
-        $newJobs->save();
-
-        return response()->json([
-            'code' => 200,
-            'user' => $user,
-            'profile' => $newProfile,
-            'skills' => $newSkills,
-            'jobs' => $newJobs,
-        ]);
+        return UserResource::collection($this->paginated($query, $request));
     }
 
-    public function uploadImage(Request $request)
+    // public function scopeBySkillCategory($query, $search)
+    // {
+    //     return $query->whereHas('skills', function ($query) use ($search) {
+    //         $query->where('name', 'like', "%{$search}%")
+    //             ->orWhereHas('parent', function ($query) use ($search) {
+    //                 $query->where('name', 'like', "%{$search}%");
+    //             });
+    //     });
+    // }
+
+    // public function scopeByJobCategory($query, $search)
+    // {
+    //     return $query->whereHas('categories', function ($query) use ($search) {
+    //         $query->where('name', 'like', "%{$search}%")
+    //             ->orWhereHas('parent', function ($query) use ($search) {
+    //                 $query->where('name', 'like', "%{$search}%");
+    //             });
+    //     });
+    // }
+
+
+    public function uploadBGImage(Request $request)
     {
-        $image = $request->file('image');
-        $filename = time() . '_' . $image->getClientOriginalName();
+        $validator = Validator::make($request->all(), [
+            'background_img' => 'required|image|max:5120', // max size in kilobytes
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'code' => 500,
+                'message' => $validator->errors()
+            ]);
+        }
+
+        $image = $request->file('background_img');
+        $filename = "background_img" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
         $image->storeAs('public/images', $filename);
         $imageUrl = asset('storage/images/' . $filename);
 
         $user = auth()->user();
 
-        $imageUrl = Profile::where('user_id', $user->id)->update([
-            'profile_url' => $imageUrl
+        $newProfile = Profile::where('user_id', $user->id)->update([
+            'background_url' => $imageUrl
         ]);
 
+        if (!$newProfile) {
+            return response()->json([
+                'code' => 500,
+                'message' => 'Error occured! Failed to save background image.',
+            ]);
+        }
         return response()->json([
             'code' => 200,
-            'image' => $imageUrl
+            'message' => 'Background image successfully added!',
+            'user' => new UserResource($user),
         ]);
     }
 
-    public function worker(){
-        $users = User::where('role', 'Worker')->whereHas('profile')->get();
+    public function uploadProfileImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'profile_img' => 'required|image|max:5120', // max size in kilobytes
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'code' => 500,
+                'message' => $validator->errors()
+            ]);
+        }
+
+        $image = $request->file('profile_img');
+        $filename =  "profile_img" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
+        $image->storeAs('public/images', $filename);
+        $imageUrl = asset('storage/images/' . $filename);
+
+        $user = auth()->user();
+
+        $newProfile = Profile::where('user_id', $user->id)->update([
+            'profile_url' => $imageUrl
+        ]);
+
+        if (!$newProfile) {
+            return response()->json([
+                'code' => 500,
+                'message' => 'Error occured! Failed to save profile image.',
+            ]);
+        }
+        return response()->json([
+            'code' => 200,
+            'message' => 'Profile image successfully added!',
+            'user' => new UserResource($user),
+        ]);
+    }
+
+    public function worker()
+    {
+        $users = User::where('role', 'Worker')->whereHas('profile')->get();
         return UserResource::collection($users);
     }
 }

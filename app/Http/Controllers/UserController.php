@@ -7,11 +7,14 @@ use App\User;
 use App\Skill;
 use Exception;
 use App\Profile;
+use App\Category;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserResource;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
@@ -48,7 +51,8 @@ class UserController extends Controller
     }
     public function getUser()
     {
-        return new UserResource(auth()->user());
+        $user = auth()->user();
+        return new UserResource($user);
     }
 
     public function index()
@@ -74,80 +78,134 @@ class UserController extends Controller
      */
     public function store(Request $request, $role)
     {
+        DB::beginTransaction();
         try {
-            $formValues = $request->params['formValues'];
-            $expertise = $request->params['expertise'];
+            if ($role === 'Worker') {
+                $formValues = $request->params['formValues'];
 
-            $user = User::where('email', $formValues['email'])->first();
+                $user = User::where('email', $formValues['email'])->first();
 
-            // $apiKey = env('GOOGLE_MAPS_API_KEY');
-            // $client = new Client([
-            //     'verify' => false
-            // ]);
-            // $response = $client->get("https://maps.googleapis.com/maps/api/geocode/json?latlng=$latitude,$longitude&key=$apiKey");
-            // $data = $response->getBody()->getContents();
-            // $address = $data['results'][0]['formatted_address'];
-            // return response()->json([
-            //     'address' => $address,
-            // ]);
+                $username = strtolower($formValues['first_name']);
 
+                while (User::where('username', $username)->exists()) {
+                    $username  = $formValues['first_name'] . "_" . $formValues['last_name'];
+                }
 
-            $slug = Str::slug($formValues['first_name'], '-');
-            $username = $slug;
-            $count = 1;
+                if (empty($user)) {
+                    $user = User::create([
+                        'uuid' => Str::uuid(),
+                        'email' => $formValues['email'],
+                        'username' => $username,
+                        'first_name' => $formValues['first_name'],
+                        'last_name' => $formValues['last_name'],
+                        'contact_number' => $formValues['number'],
+                        'role' => $role,
+                        'password' => Hash::make($formValues['password'])
+                    ]);
 
-            while (User::where('username', $username)->exists()) {
-                $username = $slug . '-' . $count;
-                $count++;
-            }
+                    Profile::create([
+                        'user_id' => $user->id,
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name,
+                        'gender' => $formValues['gender'],
+                        'address' => $formValues['address'],
+                    ]);
 
-            if (empty($user)) {
-                $user = User::create([
-                    'uuid' => Str::uuid(),
-                    'email' => $formValues['email'],
-                    'username' => $username,
-                    'first_name' => $formValues['first_name'],
-                    'last_name' => $formValues['last_name'],
-                    'contact_number' => $formValues['number'],
-                    'role' => $role,
-                    'password' => Hash::make($formValues['password'])
-                ]);
+                    $categories = $request->params['expertise']['job_categories'];
+                    $subCategories = $request->params['expertise']['selected_jobs'];
+                    $skills = $request->params['expertise']['selected_skills'];
 
-                Profile::create([
-                    'user_id' => $user->id,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'gender' => $formValues['gender'],
-                    'address' => $formValues['address'],
-                ]);
+                    $categoryIds = Category::whereIn('name', $categories)->whereNull('parent_id')->pluck('id')->toArray();
+                    $subCategoryIds = Category::whereIn('name', $subCategories)->whereNotNull('parent_id')->pluck('id')->toArray();
+                    $SkillCategoryIds = Skill::whereIn('name', $categories)->whereNull('parent_id')->pluck('id')->toArray();
+                    $skillSubCategoryIds = Skill::whereIn('name', $skills)->whereNotNull('parent_id')->pluck('id')->toArray();
 
+                    foreach ($categoryIds as $categoryId) {
+                        $category = Category::find($categoryId);
 
-                $skill = new Skill;
-                $skill->user_id = $user->id;
-                $skill->name = $expertise['skills'];
-                $skill->save();
+                        if ($category) {
+                            $user->categories()->attach($category->id);
+                            foreach ($subCategoryIds as $subCategoryId) {
+                                $subCategory = Category::find($subCategoryId);
 
-                $job = new Job;
-                $job->user_id = $user->id;
-                $job->name = $expertise['jobs'];
-                $job->save();
+                                if ($subCategory && $subCategory->isDescendantOf($category)) {
+                                    $user->categories()->attach($subCategory->id);
+                                }
+                            }
+                        }
+                    }
 
-                $this->confirmRegistrationMail($user);
+                    foreach ($SkillCategoryIds as $skillCategoryId) {
+                        $skill = Skill::find($skillCategoryId);
 
-                $token = $user->createToken(env('APP_URL'));
+                        if ($skill) {
+                            $user->skills()->attach($skill->id);
+                            foreach ($skillSubCategoryIds as $skillsSubCategoryId) {
+                                $subSkill = Skill::find($skillsSubCategoryId);
 
+                                if ($subSkill && $subSkill->isDescendantOf($skill)) {
+                                    $user->skills()->attach($subSkill->id);
+                                }
+                            }
+                        }
+                    }
+
+                    DB::commit();
+                    // $this->confirmRegistrationMail($user);
+
+                    return response()->json([
+                        'code' => 200,
+                        'message' => 'Congratulations! You are now part of the team. Please see you email for verfification.',
+                        'user' => $user,
+                    ]);
+                }
                 return response()->json([
-                    'code' => 200,
-                    'access_token' => $token->accessToken,
-                    'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
-                    'user' => new UserResource($user),
+                    'code' => 500,
+                    'message' => 'This email is taken. Please use another email',
+                ]);
+            } else {
+                $user = User::where('email', $request->email)->first();
+
+                $username = Str::slug($request->first_name, '-' . uniqid());
+
+
+                if (empty($user)) {
+                    $user = User::create([
+                        'uuid' => Str::uuid(),
+                        'email' => $request->email,
+                        'username' => $username,
+                        'first_name' => $request->first_name,
+                        'last_name' => $request->last_name,
+                        'contact_number' => $request->number,
+                        'role' => $role,
+                        'password' => Hash::make($request->password)
+                    ]);
+
+                    Profile::create([
+                        'user_id' => $user->id,
+                        'first_name' => $user->first_name,
+                        'last_name' => $user->last_name,
+                        'gender' => $request->gender,
+                        'address' => $request->address,
+                    ]);
+
+                    DB::commit();
+
+                    $this->confirmRegistrationMail($user);
+
+                    return response()->json([
+                        'code' => 200,
+                        'message' => 'Congratulations! You are now part of the team.',
+                        'user' => $user,
+                    ]);
+                }
+                return response()->json([
+                    'code' => 500,
+                    'message' => 'This email is taken. Please use another email'
                 ]);
             }
-            return response()->json([
-                'code' => 500,
-                'message' => 'This email is taken. Please use another email',
-            ]);
         } catch (Exception $e) {
+            DB::rollBack();
             return $e;
         }
     }
@@ -156,20 +214,25 @@ class UserController extends Controller
     {
         $user = User::where('uuid', $id)->first();
 
-        if (Auth::user()->email_verified_at !== null) {
+        if (!$user) {
             return response()->json([
-                'code' => 500,
-                'message' => 'Greet! Your account is already identified and accepted!',
+                'code' => 404,
+                'message' => "User not found!"
+            ]);
+        }
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'code' => 400,
+                'message' => "Email already verified! Please proceed to login"
             ]);
         }
 
-        $user->update([
-            'email_verfied_at' => now(),
-        ]);
+        $user->email_verified_at = now();
+        $user->save();
 
         return response()->json([
             'code' => 200,
-            'message' => 'Congrangulations! You are now offically a member.'
+            'message' => "Your account is successfuly verified!",
         ]);
     }
 

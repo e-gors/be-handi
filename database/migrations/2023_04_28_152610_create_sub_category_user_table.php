@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateJobsTable extends Migration
+class CreateSubCategoryUserTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateJobsTable extends Migration
      */
     public function up()
     {
-        Schema::create('jobs', function (Blueprint $table) {
+        Schema::create('sub_category_user', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->text('name');
+            $table->foreignId('category_id');
+            $table->foreignId('parent_id');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class CreateJobsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('sub_category_user');
     }
 }

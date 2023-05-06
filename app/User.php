@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, Notifiable, SoftDeletes;
 
@@ -47,26 +47,24 @@ class User extends Authenticatable
         'email_verified_at',
     ];
 
+
     public function getFullNameAttribute()
     {
         return implode(' ', [$this->first_name, $this->last_name]);
     }
-    
+
     public function profile()
     {
         return $this->hasOne(Profile::class);
     }
 
-    public function jobs()
-    {
-        return $this->hasMany(Job::class);
-    }
     public function skills()
     {
-        return $this->hasMany(Skill::class);
+        return $this->belongsToMany(Skill::class)->with('children');
     }
 
-    public function category(){
-        return $this->belongsTo(Category::class);
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class)->with('children');
     }
 }
