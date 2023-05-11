@@ -41,6 +41,7 @@ class UserController extends Controller
                     'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
                     'user' => $user->role === 'Worker' ? new WorkerResource($user) : new ClientResource($user)
                 ]);
+                
             } else {
                 return response()->json([
                     'code' => 500,
