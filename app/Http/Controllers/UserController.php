@@ -39,7 +39,7 @@ class UserController extends Controller
                     'code' => 200,
                     'access_token' => $token->accessToken,
                     'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
-                    'user' => $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user)
+                    'user' => $user->role === 'Worker' ? new WorkerResource($user) : new ClientResource($user)
                 ]);
             } else {
                 return response()->json([
@@ -82,9 +82,8 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            $formValues = $request->params['formValues'];
-
             if ($role === 'Worker') {
+                $formValues = $request->params['formValues'];
 
                 $user = User::where('email', $formValues['email'])->first();
 
@@ -100,7 +99,7 @@ class UserController extends Controller
                 $profileLink = env('APP_BASE_URL') . $username;
 
                 if (empty($user)) {
-                    $user = User::updateOrCreate([
+                    $newUser = User::updateOrCreate([
                         'uuid' => Str::uuid(),
                         'email' => $formValues['email'],
                         'username' => $username,
@@ -112,13 +111,13 @@ class UserController extends Controller
                     ]);
 
                     Profile::updateOrCreate([
-                        'user_id' => $user->id,
+                        'user_id' => $newUser->id,
                         'profile_link' => $profileLink,
-                        'first_name' => $user->first_name,
-                        'last_name' => $user->last_name,
+                        'first_name' => $newUser->first_name,
+                        'last_name' => $newUser->last_name,
                         'gender' => $formValues['gender'],
                         'address' => $formValues['address'],
-                        'profile_link' => env('APP_BASE_URL') . "/profile/overview/" . $user->uuid,
+                        'profile_link' => env('APP_BASE_URL') . "/profile/overview/" . $newUser->uuid,
                     ]);
 
                     $categories = $request->params['expertise']['job_categories'];
@@ -134,12 +133,12 @@ class UserController extends Controller
                         $category = Category::find($categoryId);
 
                         if ($category) {
-                            $user->categories()->attach($category->id);
+                            $newUser->categories()->attach($category->id);
                             foreach ($subCategoryIds as $subCategoryId) {
                                 $subCategory = Category::find($subCategoryId);
 
                                 if ($subCategory && $subCategory->isDescendantOf($category)) {
-                                    $user->categories()->attach($subCategory->id);
+                                    $newUser->categories()->attach($subCategory->id);
                                 }
                             }
                         }
@@ -149,24 +148,24 @@ class UserController extends Controller
                         $skill = Skill::find($skillCategoryId);
 
                         if ($skill) {
-                            $user->skills()->attach($skill->id);
+                            $newUser->skills()->attach($skill->id);
                             foreach ($skillSubCategoryIds as $skillsSubCategoryId) {
                                 $subSkill = Skill::find($skillsSubCategoryId);
 
                                 if ($subSkill && $subSkill->isDescendantOf($skill)) {
-                                    $user->skills()->attach($subSkill->id);
+                                    $newUser->skills()->attach($subSkill->id);
                                 }
                             }
                         }
                     }
 
                     DB::commit();
-                    // $this->confirmRegistrationMail($user);
+                    $this->confirmRegistrationMail($newUser);
 
                     return response()->json([
                         'code' => 200,
                         'message' => 'Congratulations! You are now part of the team. Please see you email for verfification.',
-                        'user' => $user,
+                        'user' => $newUser,
                     ]);
                 }
                 return response()->json([
@@ -176,20 +175,19 @@ class UserController extends Controller
             } else {
                 $user = User::where('email', $request->email)->first();
 
-                $username = strtolower($formValues['first_name']);
+                $username = strtolower($request->firt_name);
 
                 while (User::where('username', $username)->exists()) {
-                    $username  = $formValues['first_name'] . "_" . $formValues['last_name'];
+                    $username  = $request->first_name . "_" . $request->last_name;
                 }
                 while (User::where('username', $username)->exists()) {
-                    $username  = $formValues['first_name'] . "." . $formValues['last_name'];
+                    $username  = $request->first_name . "." . $request->last_name;
                 }
 
                 $profileLink = env('APP_BASE_URL') . $username;
 
-
                 if (empty($user)) {
-                    $user = User::create([
+                    $newUser = User::create([
                         'uuid' => Str::uuid(),
                         'email' => $request->email,
                         'username' => $username,
@@ -201,22 +199,22 @@ class UserController extends Controller
                     ]);
 
                     Profile::create([
-                        'user_id' => $user->id,
+                        'user_id' => $newUser->id,
                         'profile_link' => $profileLink,
-                        'first_name' => $user->first_name,
-                        'last_name' => $user->last_name,
+                        'first_name' => $newUser->first_name,
+                        'last_name' => $newUser->last_name,
                         'gender' => $request->gender,
                         'address' => $request->address,
                     ]);
 
                     DB::commit();
 
-                    // $this->confirmRegistrationMail($user);
+                    $this->confirmRegistrationMail($newUser);
 
                     return response()->json([
                         'code' => 200,
-                        'message' => 'Congratulations! You are now part of the team.',
-                        'user' => $user,
+                        'message' => 'Congratulations! You are now part of the team. Please see you email for verfification.',
+                        'user' => $newUser,
                     ]);
                 }
                 return response()->json([
@@ -240,19 +238,13 @@ class UserController extends Controller
                 'message' => "User not found!"
             ]);
         }
-        if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'code' => 400,
-                'message' => "Email already verified! Please proceed to login"
-            ]);
-        }
 
         $user->email_verified_at = now();
         $user->save();
 
         return response()->json([
             'code' => 200,
-            'message' => "Your account is successfuly verified!",
+            'message' => "Your account is successfuly verified. Please proceed to login!",
         ]);
     }
 
