@@ -16,6 +16,7 @@ class CreateProfilesTable extends Migration
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id');
+            $table->string('profile_link');
             $table->text('background')->nullable();
             $table->string('profile_url')->nullable();
             $table->string('background_url')->nullable();
@@ -24,7 +25,10 @@ class CreateProfilesTable extends Migration
             $table->string('gender');
             $table->string('address');
             $table->string('rate')->nullable();
-            $table->string('availability')->nullable();
+            $table->enum('availability', ['available', 'unavailable'])->default('available');
+            $table->string('facebook_url')->nullable();
+            $table->string('instagram_url')->nullable();
+            $table->string('twitter_url')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

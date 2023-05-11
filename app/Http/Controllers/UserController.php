@@ -8,12 +8,14 @@ use App\Skill;
 use Exception;
 use App\Profile;
 use App\Category;
+use App\Http\Resources\ClientResource;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\WorkerResource;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -37,7 +39,7 @@ class UserController extends Controller
                     'code' => 200,
                     'access_token' => $token->accessToken,
                     'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
-                    'user' => new UserResource($user)
+                    'user' => $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user)
                 ]);
             } else {
                 return response()->json([
@@ -52,7 +54,7 @@ class UserController extends Controller
     public function getUser()
     {
         $user = auth()->user();
-        return new UserResource($user);
+        return $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user);
     }
 
     public function index()
@@ -80,8 +82,9 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
+            $formValues = $request->params['formValues'];
+
             if ($role === 'Worker') {
-                $formValues = $request->params['formValues'];
 
                 $user = User::where('email', $formValues['email'])->first();
 
@@ -90,9 +93,14 @@ class UserController extends Controller
                 while (User::where('username', $username)->exists()) {
                     $username  = $formValues['first_name'] . "_" . $formValues['last_name'];
                 }
+                while (User::where('username', $username)->exists()) {
+                    $username  = $formValues['first_name'] . "." . $formValues['last_name'];
+                }
+
+                $profileLink = env('APP_BASE_URL') . $username;
 
                 if (empty($user)) {
-                    $user = User::create([
+                    $user = User::updateOrCreate([
                         'uuid' => Str::uuid(),
                         'email' => $formValues['email'],
                         'username' => $username,
@@ -103,12 +111,14 @@ class UserController extends Controller
                         'password' => Hash::make($formValues['password'])
                     ]);
 
-                    Profile::create([
+                    Profile::updateOrCreate([
                         'user_id' => $user->id,
+                        'profile_link' => $profileLink,
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'gender' => $formValues['gender'],
                         'address' => $formValues['address'],
+                        'profile_link' => env('APP_BASE_URL') . "/profile/overview/" . $user->uuid,
                     ]);
 
                     $categories = $request->params['expertise']['job_categories'];
@@ -166,7 +176,16 @@ class UserController extends Controller
             } else {
                 $user = User::where('email', $request->email)->first();
 
-                $username = Str::slug($request->first_name, '-' . uniqid());
+                $username = strtolower($formValues['first_name']);
+
+                while (User::where('username', $username)->exists()) {
+                    $username  = $formValues['first_name'] . "_" . $formValues['last_name'];
+                }
+                while (User::where('username', $username)->exists()) {
+                    $username  = $formValues['first_name'] . "." . $formValues['last_name'];
+                }
+
+                $profileLink = env('APP_BASE_URL') . $username;
 
 
                 if (empty($user)) {
@@ -183,6 +202,7 @@ class UserController extends Controller
 
                     Profile::create([
                         'user_id' => $user->id,
+                        'profile_link' => $profileLink,
                         'first_name' => $user->first_name,
                         'last_name' => $user->last_name,
                         'gender' => $request->gender,
@@ -191,7 +211,7 @@ class UserController extends Controller
 
                     DB::commit();
 
-                    $this->confirmRegistrationMail($user);
+                    // $this->confirmRegistrationMail($user);
 
                     return response()->json([
                         'code' => 200,

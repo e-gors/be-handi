@@ -29,4 +29,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('post-jobs/{id}', 'PostController@post');
     Route::post('upload/bg-image', 'ProfileController@uploadBGImage');
     Route::post('upload/profile-image', 'ProfileController@uploadProfileImage');
+    Route::post('update/background', 'ProfileController@updateBackground');
+    Route::post('update/social-networks', 'ProfileController@updateSocialNetwork');
+    Route::delete('delete/social-networks/:params', 'ProfileController@removeSocialNetworks');
 });

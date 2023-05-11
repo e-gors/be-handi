@@ -16,11 +16,14 @@ class Profile extends Model
         'last_name',
         'gender',
         'address',
-        'contact_number',
         'profile_url',
         'background_url',
         'daily_rate',
-        'availability'
+        'availability',
+        'facebook_url',
+        'instagram_url',
+        'twitter_url',
+        'profile_link'
     ];
 
     protected $appends = [
@@ -38,12 +41,15 @@ class Profile extends Model
         $weights = [
             'first_name' => 1,
             'last_name' => 1,
-            'background' => 2,
-            'profile_url' => 2,
+            'background' => 1,
+            'profile_url' => 1,
             'background_url' => 1,
             'address' => 1,
-            'contact_number' => 1,
-            'rate' => 1,
+            'daily_rate' => 1,
+            'facebook_url' => 1,
+            'instagram_url' => 0.5,
+            'twitter_url' => 0.5,
+            'gender' => 1
         ];
 
         $completedFields = 0;
@@ -69,8 +75,17 @@ class Profile extends Model
         if ($this->contact_number) {
             $completedFields += $weights['contact_number'];
         }
-        if ($this->rate) {
-            $completedFields += $weights['rate'];
+        if ($this->daily_rate) {
+            $completedFields += $weights['daily_rate'];
+        }
+        if ($this->facebook_url) {
+            $completedFields += $weights['facebook_url'];
+        }
+        if ($this->instagram_url) {
+            $completedFields += $weights['instagram_url'];
+        }
+        if ($this->twitter_url) {
+            $completedFields += $weights['twitter_url'];
         }
 
 

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Illuminate\Support\Carbon;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -53,9 +54,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return implode(' ', [$this->first_name, $this->last_name]);
     }
 
+
     public function profile()
     {
         return $this->hasOne(Profile::class);
+    }
+    public function socialNetwork()
+    {
+        return $this->hasOne(SocialNetwork::class);
     }
 
     public function skills()
