@@ -1,6 +1,8 @@
 <?php
 
 use App\Mail\ConfirmRegistration;
+use App\Mail\NewProposalMail;
+use App\Mail\NewJobPost;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,3 +20,10 @@ use Illuminate\Support\Facades\Route;
 //     return new ConfirmRegistration();
 // });
 // Route::get('/confirmed/{id}', 'UserController@confirmedUser');
+
+// Route::get('/notification/proposal', function () {
+//     return new NewProposalMail();
+// });
+// Route::get('/notification/post', function () {
+//     return new NewJobPost();
+// });

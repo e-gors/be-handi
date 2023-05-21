@@ -10,7 +10,7 @@ class Bid extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'post_id', 'description', 'amount', 'status'
+        'user_id', 'post_id', 'proposal', 'rate', 'status', 'images'
     ];
 
     public function user()

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSubSkillUserTable extends Migration
+class CreatePostQuestionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreateSubSkillUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('sub_skill_user', function (Blueprint $table) {
+        Schema::create('post_questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('skill_id');
-            $table->foreignId('parent_id');
+            $table->foreignId('post_id');
+            $table->string('status')->nullable();
+            $table->string('question')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ class CreateSubSkillUserTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sub_skill_user');
+        Schema::dropIfExists('post_questions');
     }
 }

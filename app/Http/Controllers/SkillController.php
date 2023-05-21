@@ -14,21 +14,9 @@ class SkillController extends Controller
         return SkillResource::collection($skill);
     }
 
-    // public function store(Request $request)
-    // {
-    //     $category = Skill::create([
-    //         'name' => $request->input('category_name'),
-    //     ]);
-
-    //     if ($request->filled('parent_category_id')) {
-    //         $parentCategory = Skil::find($request->input('parent_category_id'));
-    //         $category->appendToNode($parentCategory)->save();
-    //     }
-
-    //     if ($request->filled('sub_category_name')) {
-    //         $subCategory = $category->children()->create([
-    //             'name' => $request->input('sub_category_name'),
-    //         ]);
-    //     }
-    // }
+    public function children()
+    {
+        $children = SKill::whereNotNull('parent_id')->get();
+        return SkillResource::collection($children);
+    }
 }

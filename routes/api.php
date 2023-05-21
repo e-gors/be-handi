@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,21 +14,31 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Public Routes
-Route::get('posts', 'PostController@index');
 Route::post('login', 'UserController@login');
 Route::post('join-us/{role}', 'UserController@store');
+Route::post('apply/register', 'UserController@registerOnApply');
 Route::get('verify-email/{id}', 'UserController@confirmedUser');
 Route::get('categories', 'CategoryController@categories');
 Route::get('skills', 'SkillController@skills');
-Route::get('workers', 'ProfileController@index');
+Route::get('workers', 'ProfileController@worker');
+Route::get('skills/children', 'SkillController@children');
+Route::get('jobs', 'PostController@index');
+Route::get('locations', 'LocationController@index');
+Route::get('worker/{uuid}', 'ProfileController@filteredWorker');
+// Route::post('/send/sms', 'Controller@sendSms');
 
 //Private Routes
 Route::middleware('auth:api')->group(function () {
     Route::get('get-user', 'UserController@getUser');
-    Route::post('post-jobs/{id}', 'PostController@post');
+    Route::post('new/job-post', 'PostController@post');
     Route::post('upload/bg-image', 'ProfileController@uploadBGImage');
     Route::post('upload/profile-image', 'ProfileController@uploadProfileImage');
     Route::post('update/background', 'ProfileController@updateBackground');
     Route::post('update/social-networks', 'ProfileController@updateSocialNetwork');
-    Route::delete('delete/social-networks/:params', 'ProfileController@removeSocialNetworks');
+    Route::delete('delete/social-networks/{params}', 'ProfileController@removeSocialNetworks');
+    Route::post('new/proposal/{post}', 'ProposalController@newProposal');
+    Route::post('new/shortlist/post/{id}', 'ShortlistController@addPostToShortlist');
+    Route::delete('remove/shortlist/post/{id}', 'ShortlistController@removePostFromShortlist');
+    Route::post('new/shortlist/user/{id}', 'ShortlistController@addUserToShortlist');
+    Route::get('offers', 'OfferController@index');
 });

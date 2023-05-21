@@ -15,18 +15,18 @@ class AdminUserSeeder extends Seeder
      */
     public function run()
     {
-        $admin = Role::where('name', 'Super Admin')->first();
+        $role = Role::where('name', 'Super Admin')->first();
 
-        $exist = User::where('email', 'admin@handi.com')->first();
+        $exist = User::where('email', 'admin@gmail.com')->first();
         if (empty($exist)) {
             User::updateOrCreate([
                 'uuid' => Str::uuid(),
                 'first_name' => 'Admin',
                 'last_name' => 'Admin',
-                'email' => 'admin@handi.com',
+                'email' => 'admin@gmail.com',
                 'username' => 'admin',
-                'role' => $admin->name,
-                'password' => Hash::make('password'),
+                'role' => $role->name,
+                'password' => Hash::make('trabahante'),
                 'email_verified_at' => now()
             ]);
         }

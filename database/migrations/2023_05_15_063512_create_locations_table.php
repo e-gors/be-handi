@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateShortListsTables extends Migration
+class CreateLocationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,10 @@ class CreateShortListsTables extends Migration
      */
     public function up()
     {
-        Schema::create('short_lists_tables', function (Blueprint $table) {
+        Schema::create('locations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id');
-            $table->foreignId('profile_id')->nullable();
-            $table->foreignId('post_id')->nullable();
-            $table->string('favorite_type');
+            $table->string('name');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -31,6 +27,6 @@ class CreateShortListsTables extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('short_lists_tables');
+        Schema::dropIfExists('locations');
     }
 }

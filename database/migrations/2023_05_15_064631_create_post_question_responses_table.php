@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSubCategoryUserTable extends Migration
+class CreatePostQuestionResponsesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateSubCategoryUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('sub_category_user', function (Blueprint $table) {
+        Schema::create('post_question_responses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id');
-            $table->foreignId('parent_id');
+            $table->foreignId('post_question_id');
+            $table->string('response');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class CreateSubCategoryUserTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sub_category_user');
+        Schema::dropIfExists('post_question_responses');
     }
 }

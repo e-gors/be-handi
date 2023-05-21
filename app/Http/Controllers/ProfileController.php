@@ -2,55 +2,74 @@
 
 namespace App\Http\Controllers;
 
-use App\Job;
 use App\User;
-use App\Skill;
 use App\Profile;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
-use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ClientResource;
 use App\Http\Resources\WorkerResource;
-use App\SocialNetwork;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
     public function index(Request $request)
     {
+    }
+    public function filteredWorker($uuid)
+    {
+        $worker = User::whereHas('profile')->where('uuid', $uuid)->get();
+
+        return WorkerResource::collection($worker);
+    }
+    public function worker(Request $request)
+    {
         $search = $request->search ? $request->search : null;
+        $category = $request->category ? $request->category : null;
+        $location = $request->location ? $request->location : null;
+        $skill = $request->skill ? $request->skill : null;
+        $salaryRange = $request->salary_range ? $request->salary_range : null;
+
         $query = User::query();
 
-        $query->where('role', 'Worker')->get();
+        $query->where('role', 'Worker');
 
-        return UserResource::collection($this->paginated($query, $request));
+        if (!is_null($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%$search%")
+                    ->orWhere('last_name', 'LIKE', "%$search%")
+                    ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
+            });
+        }
+        if (!is_null($category)) {
+            $query->whereHas('categories', function ($q) use ($category) {
+                $q->whereNotNull('parent_id')->where('name', $category);
+            });
+        }
+        if (!is_null($location)) {
+            $query->whereHas('profile', function ($q) use ($location) {
+                $q->where('address', 'LIKE', "%$location%");
+            });
+        }
+
+        if (!is_null($skill)) {
+            $query->whereHas('skills', function ($q) use ($skill) {
+                $q->whereNotNull('parent_id')->where('name', $skill);
+            });
+        }
+        if (!is_null($salaryRange)) {
+            $query->whereHas('profile', function ($q) use ($salaryRange) {
+                $q->where(function ($q) use ($salaryRange) {
+                    $q->whereNull('rate')
+                        ->orWhereBetween('rate', [0, $salaryRange]);
+                });
+            });
+        }
+
+        return WorkerResource::collection($this->paginated($query, $request));
     }
-    public function worker()
-    {
-        $users = User::where('role', 'Worker')->whereHas('profile')->get();
-        return UserResource::collection($users);
-    }
-
-    // public function scopeBySkillCategory($query, $search)
-    // {
-    //     return $query->whereHas('skills', function ($query) use ($search) {
-    //         $query->where('name', 'like', "%{$search}%")
-    //             ->orWhereHas('parent', function ($query) use ($search) {
-    //                 $query->where('name', 'like', "%{$search}%");
-    //             });
-    //     });
-    // }
-
-    // public function scopeByJobCategory($query, $search)
-    // {
-    //     return $query->whereHas('categories', function ($query) use ($search) {
-    //         $query->where('name', 'like', "%{$search}%")
-    //             ->orWhereHas('parent', function ($query) use ($search) {
-    //                 $query->where('name', 'like', "%{$search}%");
-    //             });
-    //     });
-    // }
-
 
     public function uploadBGImage(Request $request)
     {
@@ -67,8 +86,11 @@ class ProfileController extends Controller
 
         $image = $request->file('background_img');
         $filename = "background_img" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
-        $image->storeAs('public/images', $filename);
-        $imageUrl = asset('storage/images/' . $filename);
+        if (!Storage::disk('local')->exists('/backgrounds')) {
+            Storage::disk('local')->makeDirectory('/backgrounds');
+        }
+        $image->storeAs('public/backgrounds', $filename);
+        $imageUrl = asset('storage/backgrounds/' . $filename);
 
         $user = auth()->user();
 
@@ -104,8 +126,11 @@ class ProfileController extends Controller
 
         $image = $request->file('profile_img');
         $filename =  "profile_img" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
-        $image->storeAs('public/images', $filename);
-        $imageUrl = asset('storage/images/' . $filename);
+        if (!Storage::disk('public')->exists('profiles')) {
+            Storage::disk('public')->makeDirectory('profiles');
+        }
+        $image->storeAs('public/profiles', $filename);
+        $imageUrl = asset('storage/profiles/' . $filename);
 
         $user = auth()->user();
 
@@ -172,7 +197,7 @@ class ProfileController extends Controller
             return response()->json([
                 'code' => 200,
                 'message' => 'Facebook link successfully added!',
-                'user' => new WorkerResource($user),
+                'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
 
@@ -190,7 +215,7 @@ class ProfileController extends Controller
             return response()->json([
                 'code' => 200,
                 'message' => 'Twitter link successfully added!',
-                'user' => new WorkerResource($user),
+                'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
         if ($instagram) {
@@ -207,7 +232,7 @@ class ProfileController extends Controller
             return response()->json([
                 'code' => 200,
                 'message' => 'Instagram link successfully added!',
-                'user' => new WorkerResource($user),
+                'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
     }
@@ -232,7 +257,8 @@ class ProfileController extends Controller
             }
             return response()->json([
                 'code' => 200,
-                'message' => 'Facebook link successfully deleted'
+                'message' => 'Facebook link successfully deleted',
+                'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
         if ($params === 'Instagram') {
@@ -247,7 +273,8 @@ class ProfileController extends Controller
             }
             return response()->json([
                 'code' => 200,
-                'message' => 'Instagram link successfully deleted'
+                'message' => 'Instagram link successfully deleted',
+                'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
         if ($params === 'Twitter') {
@@ -262,7 +289,8 @@ class ProfileController extends Controller
             }
             return response()->json([
                 'code' => 200,
-                'message' => 'Twitter link successfully deleted'
+                'message' => 'Twitter link successfully deleted',
+                'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
     }

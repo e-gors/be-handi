@@ -15,14 +15,22 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
             $table->foreignId('user_id'); // owner of the post
-            $table->string('title'); 
+            $table->string('title');
             $table->text('description');
-            $table->text('required_skills')->nullable();
-            $table->integer('salary_min')->nullable();
-            $table->integer('salary_max')->nullable();
-            $table->string('location');
-            $table->boolean('is_published')->default(false);
+            $table->text('skills')->nullable();
+            $table->string('category');
+            $table->string('position');
+            $table->string('job_type');
+            $table->string('days')->nullable();
+            $table->decimal('rate', 8, 2)->nullable();
+            $table->decimal('budget', 12, 2)->nullable();
+            $table->text('locations')->nullable();
+            $table->text('questions')->nullable();
+            $table->text('images')->nullable();
+            $table->string('post_url');
+            $table->enum('visibility', ['Public', 'Private'])->default('Public');
             $table->timestamps();
             $table->softDeletes();
         });

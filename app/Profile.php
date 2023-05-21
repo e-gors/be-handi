@@ -18,7 +18,7 @@ class Profile extends Model
         'address',
         'profile_url',
         'background_url',
-        'daily_rate',
+        'rate',
         'availability',
         'facebook_url',
         'instagram_url',
@@ -45,7 +45,7 @@ class Profile extends Model
             'profile_url' => 1,
             'background_url' => 1,
             'address' => 1,
-            'daily_rate' => 1,
+            'rate' => 1,
             'facebook_url' => 1,
             'instagram_url' => 0.5,
             'twitter_url' => 0.5,
@@ -95,5 +95,11 @@ class Profile extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function shortlistedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'shortlists', 'profile_id', 'user_id')
+            ->where('favorite_type', 'profile');
     }
 }

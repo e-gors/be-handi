@@ -55,6 +55,8 @@ class WorkerResource extends JsonResource
             'categoryChildren' => CategoryResource::collection($this->categories->whereNotNull('parent_id')->toArray()),
             'skillChildren' => SkillResource::collection($this->skills->whereNotNull('parent_id')->toArray()),
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
+            'shortlist' => ShortlistResource::collection($this->shortlist),
+            'bids' => ShortlistResource::collection($this->bids),
         ];
     }
 }

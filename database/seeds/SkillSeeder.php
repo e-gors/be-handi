@@ -19,9 +19,7 @@ class SkillSeeder extends Seeder
                 'children' => [
                     'Building codes knowledge',
                     'Tool familiarity',
-                    'Attention to detail',
                     'Spatial awareness',
-                    'Physical stamina',
                     'Communication',
                     'Teamwork'
                 ],
@@ -30,11 +28,8 @@ class SkillSeeder extends Seeder
                 'name' => 'Manufacturing and Production',
                 'children' => [
                     'Understanding of processes',
-                    'Attention to detail',
-                    'Quality control',
                     'Technical reading',
                     'Hand-eye coordination',
-                    'Physical stamina',
                     'Problem-solving',
                     'Troubleshooting'
                 ],
@@ -54,10 +49,8 @@ class SkillSeeder extends Seeder
                 'children' => [
                     'Mechanical systems knowledge',
                     'Tool proficiency',
-                    'Attention to detail',
                     'Quality control',
                     'Diagnostic software proficiency',
-                    'Communication',
                     'Customer service'
                 ],
             ],
@@ -68,7 +61,6 @@ class SkillSeeder extends Seeder
                     'Machinery operation',
                     'Physical stamina',
                     'Attention to detail',
-                    'Quality control',
                     'Math/budgeting skills',
                 ],
             ],

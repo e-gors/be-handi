@@ -26,6 +26,7 @@ class ClientResource extends JsonResource
             'contact_number' => $this->contact_number,
             'email_verified_at' => $this->email_verified_at,
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
+            'shortlist' => ShortlistResource::collection($this->shortlist),
         ];
     }
 }

@@ -17,9 +17,10 @@ class CreateBidsTable extends Migration
             $table->id();
             $table->foreignId('user_id');
             $table->foreignId('post_id');
-            $table->text('description');
-            $table->decimal('amount', 10, 2);
+            $table->text('proposal');
+            $table->decimal('rate', 10, 2);
             $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+            $table->text('images')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
