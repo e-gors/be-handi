@@ -40,4 +40,9 @@ class Post extends Model
     {
         return $this->hasMany(Shortlist::class, 'post_id');
     }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
 }

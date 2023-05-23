@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Profile;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class BidResource extends JsonResource
@@ -18,11 +19,14 @@ class BidResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,
             'post_id' => $this->post_id,
-            'proposal' => unserialize($this->proposal),
+            'proposal' => $this->proposal,
             'rate' => $this->rate,
             'status' => $this->status,
             'images' => unserialize($this->images),
             'created_at' => $this->created_at,
+            'post' => $this->post,
+            'user' => $this->user,
+            'profile' => Profile::where('user_id', $this->user_id)->first()
         ];
     }
 }

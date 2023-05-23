@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Bid;
+use App\Http\Resources\BidResource;
 use App\Http\Resources\WorkerResource;
 use App\Post;
 use App\User;
@@ -14,6 +15,36 @@ use Illuminate\Support\Facades\Storage;
 
 class ProposalController extends Controller
 {
+    public function index(Request $request)
+    {
+        $search = $request->search ? $request->search : null;
+        $orderByRate = $request->order_by_rate ? $request->order_by_rate : null;
+        $orderByDate = $request->order_by_date ? $request->order_by_date : null;
+        $status = $request->status ? $request->status : null;
+
+        $query = Bid::query();
+        $query->with('user', 'post');
+
+        if (!is_null($search)) {
+            $query->whereHas('post', function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%$search%")
+                    ->orWhere('category', 'LIKE', "%$search%")
+                    ->orWhere('position', 'LIKE', "%$search%");
+            });
+        }
+        if (!is_null($orderByRate)) {
+            $query->orderBy('rate', $orderByRate);
+        }
+        if (!is_null($orderByDate)) {
+            $query->orderBy('created_at', $orderByDate);
+        }
+        if (!is_null($status)) {
+            $query->where('status', $status);
+        }
+        $query->get();
+
+        return BidResource::collection($this->paginated($query, $request));
+    }
     public function newProposal(Request $request, Post $post)
     {
         $user = auth()->user();

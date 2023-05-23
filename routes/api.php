@@ -40,5 +40,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('new/shortlist/post/{id}', 'ShortlistController@addPostToShortlist');
     Route::delete('remove/shortlist/post/{id}', 'ShortlistController@removePostFromShortlist');
     Route::post('new/shortlist/user/{id}', 'ShortlistController@addUserToShortlist');
+    Route::get('proposals', 'ProposalController@index');
     Route::get('offers', 'OfferController@index');
+    Route::get('recommended/jobs', 'PostController@recommendedJobs');
+    Route::post('new/job-offer', 'OfferController@store');
+    Route::post('ratings', 'RatingController@store');
 });

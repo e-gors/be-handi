@@ -17,14 +17,17 @@ class CreateOffersTable extends Migration
             $table->id();
             $table->foreignId('user_id'); //owner of the offer
             $table->foreignId('profile_id'); // invited worker
-            $table->foreignId('post_url')->nullable();
+            $table->foreignId('post_id')->nullable();
             $table->string('title');
-            $table->string('payment_type');
-            $table->integer('days')->nullable();
+            $table->string('type');
+            $table->string('days')->nullable();
             $table->decimal('rate', 8, 2)->nullable();
             $table->decimal('budget', 12, 2)->nullable();
             $table->text('instructions')->nullable();
+            $table->text('images')->nullable();
+            $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

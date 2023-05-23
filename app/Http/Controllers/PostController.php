@@ -20,6 +20,7 @@ class PostController extends Controller
         $location = $request->location ? $request->location : null;
         $skill = $request->skill ? $request->skill : null;
         $salaryRange = $request->salary_range ? $request->salary_range : null;
+        // $shortlisted = $request->shortlisted ? $request->shortlisted : null;
 
         $query = Post::query();
 
@@ -37,12 +38,19 @@ class PostController extends Controller
         }
 
         if (!is_null($location)) {
-            $query->where('locations', 'LIKE', '%"' . $location . '"%');
+            $query->where('locations', 'LIKE', '%' . $location . '%');
         }
 
         if (!is_null($skill)) {
-            $query->where('skills', 'LIKE', '%"' . $skill . '"%');
+            $query->where('skills', 'LIKE', '%' . $skill . '%');
         }
+        // if (!is_null($shortlisted)) {
+        //     if ($shortlisted == 'true') {
+        //         $query->whereHas('shortlist');
+        //     } elseif ($shortlisted == 'false') {
+        //         $query->whereDoesntHave('shortlist');
+        //     }
+        // }
 
         // if (!is_null($salaryRange)) {
         //     $query->where(function ($q) use ($salaryRange) {
@@ -143,5 +151,17 @@ class PostController extends Controller
             DB::rollBack();
             return $e;
         }
+    }
+
+    public function recommendedJobs(Request $request)
+    {
+        $user = auth()->user();
+        $query = Post::query();
+        $categories = $user->categories;
+        $categoryNames = $categories->pluck('name')->toArray();
+
+        $query->whereIn('category', $categoryNames)->get();
+
+        return PostResource::collection($this->paginated($query, $request));
     }
 }

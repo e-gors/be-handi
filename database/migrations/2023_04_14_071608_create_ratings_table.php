@@ -15,10 +15,11 @@ class CreateRatingsTable extends Migration
     {
         Schema::create('ratings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id'); //who rates
-            $table->foreignId('profile_id'); // being rated
-            $table->string('rate_type'); // posts / client / worker
-            $table->integer('rating'); // rating value
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('reviewable_id');
+            $table->string('reviewable_type');
+            $table->text('comment');
+            $table->integer('rating');
             $table->timestamps();
         });
     }

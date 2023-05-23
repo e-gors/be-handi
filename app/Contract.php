@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Contract extends Model
 {
     protected $fillable = [
-        'user_id', 'profile_id', 'schedule_id', 'title', 'description', 'amount', 'status'
+        'post_id', 'bid_id', 'offer_id', 'status'
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 }
