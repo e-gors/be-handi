@@ -45,4 +45,5 @@ Route::middleware('auth:api')->group(function () {
     Route::get('recommended/jobs', 'PostController@recommendedJobs');
     Route::post('new/job-offer', 'OfferController@store');
     Route::post('ratings', 'RatingController@store');
+    Route::get('reviews/{uuid}', 'RatingController@getReviews');
 });

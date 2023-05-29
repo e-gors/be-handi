@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\User;
+use Exception;
 use App\Rating;
 use Illuminate\Http\Request;
 
@@ -13,18 +16,23 @@ class RatingController extends Controller
         ]);
 
         $user = auth()->user();
-        
+
        try {
         if ($validatedData) {
-            Rating::create([
-                'user_id' => $request->user_id,
-                'commentator_id' => $request->$user->id,
-                'comment' => $request->comment,
-                'rating' => $request->rating,
-            ]);
+                Rating::create([
+                    'uuid' => $request->uuid,
+                    'commentator_id' => $user->id,
+                    'comment' => $request->comment,
+                    'rating' => $request->rating,
+                ]);
         }
-       } catch (\Throwable $th) {
-        throw $th;
+        } catch (Exception $th) {
+            $th->getMessage();
        }
+    }
+
+    public function getReviews($uuid)
+    {
+        return Rating::where('uuid', $uuid)->get();
     }
 }
