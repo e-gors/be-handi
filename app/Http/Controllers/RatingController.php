@@ -22,6 +22,8 @@ class RatingController extends Controller
                 Rating::create([
                     'uuid' => $request->uuid,
                     'commentator_id' => $user->id,
+                    'commentator_fullname' => $user->first_name . ' ' . $user->last_name,
+                    'commentator_profile' => $request->commentator_profile,
                     'comment' => $request->comment,
                     'rating' => $request->rating,
                 ]);

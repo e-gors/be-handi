@@ -17,6 +17,8 @@ class CreateRatingsTable extends Migration
             $table->id();
             $table->uuid('uuid');
             $table->integer('commentator_id');
+            $table->string('commentator_profile')->nullable();
+            $table->string('commentator_fullname');
             $table->text('comment');
             $table->integer('rating');
             $table->timestamps();
