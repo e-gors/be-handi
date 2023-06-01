@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Offer;
 use App\Profile;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,6 +28,7 @@ class ClientResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
             'shortlist' => ShortlistResource::collection($this->shortlist),
+            'offers' => OfferResource::collection(Offer::where('user_id', $this->id)->get())
         ];
     }
 }

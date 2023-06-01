@@ -6,11 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
+
     protected $fillable = [
-        'user_id', 'profile_id', 'contract_id', 'day', 'start_time', 'end_time', 'date'
+        'post_id',
+        'offer_id',
+        'start_date',
+        'end_date'
     ];
 
-    public function user(){
+    public function post()
+    {
         return $this->belongsTo(User::class);
+    }
+    public function offer()
+    {
+        return $this->belongsTo(Offer::class);
     }
 }

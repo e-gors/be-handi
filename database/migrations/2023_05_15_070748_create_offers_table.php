@@ -18,6 +18,7 @@ class CreateOffersTable extends Migration
             $table->foreignId('user_id'); //owner of the offer
             $table->foreignId('profile_id'); // invited worker
             $table->foreignId('post_id')->nullable();
+            $table->foreignId('schedule_id');
             $table->string('title');
             $table->string('type');
             $table->string('days')->nullable();

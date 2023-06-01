@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Offer;
 use Exception;
+use App\Contract;
+use App\Schedule;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Resources\OfferResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -13,31 +17,41 @@ class OfferController extends Controller
 {
     public function index(Request $request)
     {
+        $search = $request->search ? $request->search : null;
+        $status = $request->status ? $request->status : null;
+
         $query = Offer::query();
+
+        if (!is_null($search)) {
+            $query->join('users', 'offers.user_id', '=', 'users.id')
+                ->where(function ($query) use ($search) {
+                    $query->where('users.first_name', 'LIKE', "%$search%")
+                        ->orWhere('users.last_name', 'LIKE', "%$search%")
+                        ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                });
+        }
+
+        if (!is_null($status)) {
+            $query->where('status', $status);
+        }
+
+        return OfferResource::collection($this->paginated($query, $request));
     }
 
     public function store(Request $request)
     {
         try {
             $user = auth()->user();
-
             $formValues = json_decode($request->formValues);
-            $images = $request->file('images');
-            $instruction = $request->instruction;
-            $workers = json_decode($request['worker']);
-            $worker = $workers[0];
-            $post = $request->post;
+            $images = $request->file('images') ? $request->file('images') : null;
+            $instruction = $request->instruction ? $request->instruction : null;
+            $workers = $request->worker ? json_decode($request->worker) : null;
+            $post = json_decode($request->post);
 
-            if (empty($worker)) {
+            if (empty($workers)) {
                 return response()->json([
                     'code' => 500,
                     'message' => "Contractor field is required!"
-                ]);
-            }
-            if (empty($post)) {
-                return response()->json([
-                    'code' => 500,
-                    'message' => "Post field is required!"
                 ]);
             }
 
@@ -60,8 +74,8 @@ class OfferController extends Controller
 
             $newOffer = Offer::create([
                 'user_id' => $user->id,
-                'profile_id' => $worker->id,
-                'post_id' => $post->id,
+                'profile_id' => $workers[0]->id,
+                'post_id' => isset($post) ? $post->id : null,
                 'title' => $formValues[0]->title,
                 'type' => $formValues[0]->type,
                 'days' => isset($formValues[0]->days) ? $formValues[0]->days : null,
@@ -77,15 +91,27 @@ class OfferController extends Controller
                     'message' => "Encounter Error while saving your offer!"
                 ]);
             } else {
-                $this->sendNewOfferNotification($worker, $newOffer, $user);
+                $this->sendNewOfferNotification($workers, $newOffer, $user);
 
                 return response()->json([
                     'code' => 200,
-                    'message' => "Successfully send new offer notifications"
+                    'message' => "Successfully send new offer to User"
                 ]);
             }
         } catch (Exception $e) {
             return $e;
         }
+    }
+
+    public function accept(Request $request, Offer $offer)
+    {
+        $user = auth()->user();
+
+        $schedule = Schedule::find(1);
+
+        $newContract = Contract::create([
+            'offer_id' => $offer->id,
+            'schedule_id' => $schedule->id
+        ]);
     }
 }

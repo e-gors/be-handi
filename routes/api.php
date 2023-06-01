@@ -25,6 +25,7 @@ Route::get('skills/children', 'SkillController@children');
 Route::get('jobs', 'PostController@index');
 Route::get('locations', 'LocationController@index');
 Route::get('worker/{uuid}', 'ProfileController@filteredWorker');
+Route::get('/user/workers', 'ProfileController@index');
 // Route::post('/send/sms', 'Controller@sendSms');
 
 //Private Routes
@@ -42,8 +43,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('new/shortlist/user/{id}', 'ShortlistController@addUserToShortlist');
     Route::get('proposals', 'ProposalController@index');
     Route::get('offers', 'OfferController@index');
+    Route::post('offer/accept/{offer}', 'OfferController@accept');
     Route::get('recommended/jobs', 'PostController@recommendedJobs');
     Route::post('new/job-offer', 'OfferController@store');
     Route::post('ratings', 'RatingController@store');
     Route::get('reviews/{uuid}', 'RatingController@getReviews');
+    Route::post('new/projects', 'ProjectController@store');
+    Route::delete('projects/{id}', 'ProjectController@destroy');
 });

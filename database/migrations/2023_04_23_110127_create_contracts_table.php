@@ -17,8 +17,10 @@ class CreateContractsTable extends Migration
             $table->id();
             $table->foreignId('post_id')->nullable();
             $table->foreignId('bid_id')->nullable();
-            $table->foreignId('offer')->nullable();
-            $table->enum('status', ['draft', 'pending', 'accepted', 'declined', 'completed'])->default('draft');
+            $table->foreignId('offer_id')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->enum('status', ['pending', 'in progress', 'completed'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });

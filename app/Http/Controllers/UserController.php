@@ -88,12 +88,12 @@ class UserController extends Controller
     private function attachCategoriesToUser($user, $categoryIds, $subCategoryIds)
     {
         foreach ($categoryIds as $categoryId) {
-            $category = Category::find($categoryId);
+            $category = Category::findOrFail($categoryId);
 
             if ($category) {
                 $user->categories()->attach($category->id);
                 foreach ($subCategoryIds as $subCategoryId) {
-                    $subCategory = Category::find($subCategoryId);
+                    $subCategory = Category::findOrFail($subCategoryId);
 
                     if ($subCategory && $subCategory->isDescendantOf($category)) {
                         $user->categories()->attach($subCategory->id);
@@ -105,12 +105,12 @@ class UserController extends Controller
     private function attachSkillsToUser($user, $SkillCategoryIds, $skillSubCategoryIds)
     {
         foreach ($SkillCategoryIds as $skillCategoryId) {
-            $skill = Skill::find($skillCategoryId);
+            $skill = Skill::findOrFail($skillCategoryId);
 
             if ($skill) {
                 $user->skills()->attach($skill->id);
                 foreach ($skillSubCategoryIds as $skillsSubCategoryId) {
-                    $subSkill = Skill::find($skillsSubCategoryId);
+                    $subSkill = Skill::findOrFail($skillsSubCategoryId);
 
                     if ($subSkill && $subSkill->isDescendantOf($skill)) {
                         $user->skills()->attach($subSkill->id);

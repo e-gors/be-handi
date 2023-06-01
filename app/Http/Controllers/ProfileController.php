@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Validator;
 
 class ProfileController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
+        $workers = User::where('role', 'Worker')->get();
+        return WorkerResource::collection($workers);
     }
     public function filteredWorker($uuid)
     {
@@ -43,11 +45,14 @@ class ProfileController extends Controller
                     ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
             });
         }
+
+
         if (!is_null($category)) {
             $query->whereHas('categories', function ($q) use ($category) {
                 $q->whereNotNull('parent_id')->where('name', $category);
             });
         }
+
         if (!is_null($location)) {
             $query->whereHas('profile', function ($q) use ($location) {
                 $q->where('address', 'LIKE', "%$location%");
@@ -59,11 +64,12 @@ class ProfileController extends Controller
                 $q->whereNotNull('parent_id')->where('name', $skill);
             });
         }
+
         if (!is_null($salaryRange)) {
             $query->whereHas('profile', function ($q) use ($salaryRange) {
                 $q->where(function ($q) use ($salaryRange) {
                     $q->whereNull('rate')
-                        ->orWhereBetween('rate', [0, $salaryRange]);
+                        ->orWhereBetween('rate', [$salaryRange]);
                 });
             });
         }

@@ -102,7 +102,7 @@
         </div>
         <div id="main">
             <h1 class="greeting">Hello {{ $user['full_name'] }},</h1>
-            <p>You have receive an offer from {{ $client['fullname'] }}. Here are the details: </p>
+            <p>You have receive an offer from {{ $client[0]->fullname }}. Here are the details: </p>
 
             <div class="details">
                 <div class="detail">
@@ -117,7 +117,11 @@
                 @endif
                 <div class="detail">
                     <p class="label">Client: </p>
-                    <p class="value">{{ $client->full_name }}</p>
+                    <p class="value">{{ $client[0]->fullname }}</p>
+                </div>
+                <div class="detail">
+                    <p class="label">Job Type: </p>
+                    <p class="value">{{ $offer->type }}</p>
                 </div>
                 <div class="detail">
                     @if (isset($offer->rate) && !empty($offer->rate))
@@ -130,7 +134,7 @@
                 </div>
                 @if(isset($offer->instruction))
                 <div class="message">
-                    <p class="label">Description: </p>
+                    <p class="label">Instruction: </p>
                     <dive class="value">{!! $offer->instruction !!}</dive>
                 </div>
                 @endif

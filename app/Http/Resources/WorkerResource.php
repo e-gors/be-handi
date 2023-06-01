@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Offer;
 use App\Profile;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -44,6 +45,7 @@ class WorkerResource extends JsonResource
             'id' => $this->id,
             'uuid' => $this->uuid,
             'email' => $this->email,
+            'username' => $this->username,
             'fullname' => $this->fullname,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
@@ -57,6 +59,8 @@ class WorkerResource extends JsonResource
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
             'shortlist' => ShortlistResource::collection($this->shortlist),
             'bids' => ShortlistResource::collection($this->bids),
+            'offers' => OfferResource::collection(Offer::where('profile_id', $this->id)->get()),
+            'projects' => ProjectResource::collection($this->projects)
         ];
     }
 }

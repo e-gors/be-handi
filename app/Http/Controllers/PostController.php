@@ -29,7 +29,9 @@ class PostController extends Controller
                 ->where(function ($query) use ($search) {
                     $query->where('users.first_name', 'LIKE', "%$search%")
                         ->orWhere('users.last_name', 'LIKE', "%$search%")
-                        ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                        ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%")
+                        ->orWhere('posts.position', 'LIKE', "%$search%")
+                        ->orWhere('posts.skills', 'LIKE', '%' . $search . '%');
                 });
         }
 
