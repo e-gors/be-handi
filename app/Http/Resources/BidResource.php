@@ -25,8 +25,8 @@ class BidResource extends JsonResource
             'images' => unserialize($this->images),
             'created_at' => $this->created_at,
             'post' => $this->post,
-            'user' => $this->user,
-            'profile' => Profile::where('user_id', $this->user_id)->first()
+            'user' => new WorkerResource($this->user),
+            'profile' => Profile::where('user_id', $this->user_id)->first(),
         ];
     }
 }

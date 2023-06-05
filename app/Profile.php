@@ -75,8 +75,8 @@ class Profile extends Model
         if ($this->contact_number) {
             $completedFields += $weights['contact_number'];
         }
-        if ($this->daily_rate) {
-            $completedFields += $weights['daily_rate'];
+        if ($this->rate) {
+            $completedFields += $weights['rate'];
         }
         if ($this->facebook_url) {
             $completedFields += $weights['facebook_url'];

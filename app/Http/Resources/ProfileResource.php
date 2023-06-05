@@ -30,11 +30,12 @@ class ProfileResource extends JsonResource
             'contact_number' => $this->contact_number,
             'profile_url' => $this->profile_url,
             'background_url' => $this->background_url,
-            'daily_rate' => $this->daily_rate,
+            'rate' => $this->rate,
             'availability' => $this->availability,
             'facebook_url' => $this->facebook_url,
             'instagram_url' => $this->instagram_url,
             'twitter_url' => $this->twitter_url,
+            'created_at' => $this->created_at
         ];
     }
 }

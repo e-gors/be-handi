@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ProjectController extends Controller
 {
+    public function index()
+    {
+        $user = auth()->user();
+        $projects = $user->projects()->get();
+        return ProjectResource::collection($projects);
+    }
     public function store(Request $request)
     {
         try {

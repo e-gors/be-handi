@@ -30,6 +30,7 @@ class CreatePostsTable extends Migration
             $table->text('questions')->nullable();
             $table->text('images')->nullable();
             $table->string('post_url');
+            $table->enum('status', ['drafted', 'posted', 'contracted'])->default('posted');
             $table->enum('visibility', ['Public', 'Private'])->default('Public');
             $table->timestamps();
             $table->softDeletes();

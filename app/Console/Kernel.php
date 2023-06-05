@@ -22,10 +22,10 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
-    // protected function schedule(Schedule $schedule)
-    // {
-    //     $schedule->command('check:work-schedule')->dailyAt('08:00');
-    // }
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command('tasks:check')->twiceDaily(8, 20);
+    }
 
     /**
      * Register the commands for the application.

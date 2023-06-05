@@ -38,10 +38,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('update/social-networks', 'ProfileController@updateSocialNetwork');
     Route::delete('delete/social-networks/{params}', 'ProfileController@removeSocialNetworks');
     Route::post('new/proposal/{post}', 'ProposalController@newProposal');
+    Route::post('update/proposal/{proposal}', 'ProposalController@updateProposal');
     Route::post('new/shortlist/post/{id}', 'ShortlistController@addPostToShortlist');
     Route::delete('remove/shortlist/post/{id}', 'ShortlistController@removePostFromShortlist');
     Route::post('new/shortlist/user/{id}', 'ShortlistController@addUserToShortlist');
     Route::get('proposals', 'ProposalController@index');
+    Route::get('user/proposals', 'ProposalController@userBids');
     Route::get('offers', 'OfferController@index');
     Route::post('offer/accept/{offer}', 'OfferController@accept');
     Route::get('recommended/jobs', 'PostController@recommendedJobs');
@@ -50,4 +52,6 @@ Route::middleware('auth:api')->group(function () {
     Route::get('reviews/{uuid}', 'RatingController@getReviews');
     Route::post('new/projects', 'ProjectController@store');
     Route::delete('projects/{id}', 'ProjectController@destroy');
+    Route::get('projects', 'ProjectController@index');
+    Route::post('choose/proposal/{proposal}/{post}', 'ProposalController@choose');
 });

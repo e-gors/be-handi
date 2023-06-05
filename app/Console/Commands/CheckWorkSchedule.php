@@ -3,8 +3,12 @@
 namespace App\Console\Commands;
 
 use App\User;
+use App\Contract;
+use App\Mail\ScheduleReminder;
 use GuzzleHttp\Client;
+use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Mail;
 
 class CheckWorkSchedule extends Command
 {
@@ -13,14 +17,14 @@ class CheckWorkSchedule extends Command
      *
      * @var string
      */
-    protected $signature = 'command:work-schedule';
+    protected $signature = 'tasks:check';
+    protected $description = 'Check for scheduled tasks and send notifications to users';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Check work schedule of users and send SMS if needed';
 
     /**
      * Create a new command instance.
@@ -39,44 +43,16 @@ class CheckWorkSchedule extends Command
      */
     public function handle()
     {
-        $users = User::all();
+        $tasks = Contract::whereDate('start_date', Carbon::tomorrow())->get();
 
-        foreach ($users as $user) {
-            $workSchedule = $user->workSchedule;
+        foreach ($tasks as $task) {
+            $user = User::find($task->user_id);
 
-            if ($workSchedule) {
-                $now = now();
-                $scheduleDate = \Carbon\Carbon::parse($workSchedule->date);
+            // Send email notification
+            Mail::to($user->email)->send(new ScheduleReminder($task));
 
-                // Check if the work schedule is tomorrow
-                if ($scheduleDate->isTomorrow()) {
-                    $this->sendSMS($user, 'Your work schedule is tomorrow.');
-                }
-
-                // Check if the work schedule is only one day away
-                if ($now->diffInDays($scheduleDate) == 1) {
-                    $this->sendSMS($user, 'Your work schedule is only one day away.');
-                }
-            }
+            // Update user status
+            $user->update(['status' => 'unavailable']);
         }
     }
-
-    // protected function sendSMS($user, $message)
-    // {
-    //     $sid = env('TWILIO_ACCOUNT_SID');
-    //     $token = env('TWILIO_AUTH_TOKEN');
-    //     $twilioNumber = env('TWILIO_NUMBER');
-
-    //     $client = new Client($sid, $token);
-
-    //     $client->messages->create(
-    //         $user->phoneNumber,
-    //         [
-    //             'from' => $twilioNumber,
-    //             'body' => $message
-    //         ]
-    //     );
-
-    //     $this->info("SMS sent to {$user->name}");
-    // }
 }

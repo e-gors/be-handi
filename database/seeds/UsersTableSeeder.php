@@ -66,7 +66,7 @@ class UsersTableSeeder extends Seeder
 
     private function attachCategoriesToUser($user)
     {
-        $categoryIds = Category::inRandomOrder()->limit(rand(1, 3))->pluck('id')->toArray();
+        $categoryIds = Category::inRandomOrder()->limit(rand(2, 3))->pluck('id')->toArray();
         $user->categories()->attach($categoryIds);
     }
 

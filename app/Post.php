@@ -45,4 +45,9 @@ class Post extends Model
     {
         return $this->hasMany(Offer::class);
     }
+
+    public function bids()
+    {
+        return $this->hasMany(Bid::class);
+    }
 }

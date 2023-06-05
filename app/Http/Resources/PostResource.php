@@ -37,7 +37,7 @@ class PostResource extends JsonResource
             'client' => new ClientResource(User::find($this->user_id)),
             'created_at' => $this->created_at->diffForHumans(),
             'total' => $user->posts->count(),
-            'schedule' => $this->schedule,
+            'bids' => BidResource::collection($this->bids)
         ];
     }
 }

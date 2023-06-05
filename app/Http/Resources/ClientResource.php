@@ -28,7 +28,8 @@ class ClientResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
             'shortlist' => ShortlistResource::collection($this->shortlist),
-            'offers' => OfferResource::collection(Offer::where('user_id', $this->id)->get())
+            'offers' => OfferResource::collection(Offer::where('user_id', $this->id)->get()),
+            'jobs' => $this->posts
         ];
     }
 }
