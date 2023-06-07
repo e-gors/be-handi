@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Skill;
 use App\Profile;
 use App\Category;

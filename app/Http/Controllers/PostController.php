@@ -84,7 +84,7 @@ class PostController extends Controller
             $questions = json_decode($request->questions);
             $skills = json_decode($request->skills);
             $locations = json_decode($request->locations);
-            $status = $request->status;
+            $visibility = $request->status;
 
             $imageUrls = [];
             if ($images) {
@@ -125,7 +125,7 @@ class PostController extends Controller
                 'images' => isset($images) ? serialize($imageUrls) : null,
                 'questions' => isset($questions) ? serialize($questions) : null,
                 'post_url' => env('APP_BASE_URL') . 'posts/' . $uuid,
-                'status' => $status,
+                'visibility' => $visibility,
             ]);
             Db::commit();
 

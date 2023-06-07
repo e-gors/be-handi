@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Post;
 use App\User;
 use App\Skill;

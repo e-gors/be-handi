@@ -10,6 +10,7 @@ use App\Contract;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\BidResource;
 use App\Http\Resources\WorkerResource;
@@ -81,7 +82,7 @@ class ProposalController extends Controller
 
         return BidResource::collection($this->paginated($query, $request));
     }
-    
+
     public function newProposal(Request $request, Post $post)
     {
         $user = auth()->user();
@@ -136,39 +137,83 @@ class ProposalController extends Controller
 
     public function updateProposal(Request $request, Bid $proposal)
     {
-        $user = auth()->user();
-
         DB::beginTransaction();
         try {
-            $images = $request->file('images');
-            $imageUrls = [];
-            if ($images) {
-                foreach ($images as $image) {
-                    $filename = "completed_project" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
-                    if (!Storage::disk('local')->exists('/completed-projects')) {
-                        Storage::disk('local')->makeDirectory('/completed-projects');
-                    }
-                    $image->storeAs('public/completed-projects', $filename);
-                    $imageUrl = asset('storage/completed-projects/' . $filename);
+            $user = auth()->user();
 
+            // Retrieve existing image URLs or initialize an empty array
+            $existingImageUrls = $proposal->images ? unserialize($proposal->images) : [];
+
+            $images = $request->file('images');
+            $urls = $request->input('images');;
+
+            $imageUrls = [];
+
+            // Check if new images are provided
+            if ($images) {
+                // Process new images
+                foreach ($images as $image) {
+                    // Check if it's a new file upload or an existing image URL
+                    if ($image instanceof UploadedFile) {
+                        $filename = "completed_project" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
+                        if (!Storage::disk('local')->exists('/completed-projects')) {
+                            Storage::disk('local')->makeDirectory('/completed-projects');
+                        }
+                        $image->storeAs('public/completed-projects', $filename);
+                        $imageUrl = asset('storage/completed-projects/' . $filename);
+
+                        $imageUrls[] = [
+                            'url' => $imageUrl,
+                        ];
+                    }
+                }
+            }
+
+            // push existing image urls into the array
+            if ($urls) {
+                foreach ($urls as $url) {
                     $imageUrls[] = [
-                        'url' => $imageUrl,
+                        'url' => $url
                     ];
                 }
             }
 
-            $removedComma = str_replace(',', '', $request->rate);
+            // Remove existing image URLs that are not present in the request
+            foreach ($existingImageUrls as $index => $existingImageUrl) {
+                $isMatched = false;
+                foreach ($imageUrls as $newImageUrl) {
+                    if ($existingImageUrl['url'] === $newImageUrl['url']) {
+                        $isMatched = true;
+                        break;
+                    }
+                }
+                if (!$isMatched) {
+                    Storage::disk('public')->delete('completed-projects/' . basename($existingImageUrl['url']));
+                    unset($existingImageUrls[$index]);
+                }
+            }
 
+            // Merge existing and new image URLs if new images are present
+            if ($images && count($existingImageUrls) > 0) {
+                $imageUrls = array_merge($existingImageUrls, $imageUrls);
+            }
+
+            // Remove duplicate URLs
+            $uniqueUrls = array_unique($imageUrls, SORT_REGULAR);
+
+            // Update the proposal with the new images
+            $removedComma = str_replace(',', '', $request->rate);
             $proposal->update([
                 'proposal' => $request->proposal,
                 'rate' => $removedComma,
-                'images' => isset($images) ? serialize($imageUrls) : null,
+                'images' => count($uniqueUrls) > 0 ? serialize($uniqueUrls) : null,
             ]);
+
             DB::commit();
 
             return response()->json([
                 'code' => 200,
-                'message' => "New proposal added successfully!",
+                'message' => "Proposal updated successfully!",
                 'user' => new WorkerResource($user)
             ]);
         } catch (Exception $e) {
@@ -176,6 +221,7 @@ class ProposalController extends Controller
             return $e;
         }
     }
+
 
     public function choose(Request $request, Bid $proposal, Post $post)
     {
