@@ -81,6 +81,7 @@ class ProposalController extends Controller
 
         return BidResource::collection($this->paginated($query, $request));
     }
+    
     public function newProposal(Request $request, Post $post)
     {
         $user = auth()->user();

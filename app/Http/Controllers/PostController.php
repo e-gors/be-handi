@@ -26,6 +26,7 @@ class PostController extends Controller
 
             $query = Post::query();
             $query->where('visibility', 'Public');
+            $query->where('status', 'posted');
 
             if (!is_null($search)) {
                 $query->join('users', 'posts.user_id', '=', 'users.id')
@@ -139,7 +140,7 @@ class PostController extends Controller
 
                 if ($matchedUsers !== null && !empty($matchedUsers)) {
                     foreach ($matchedUsers as $user) {
-                        $this->sendNewJobPostNotification($user, $postResource, $authUser);
+                        // $this->sendNewJobPostNotification($user, $postResource, $authUser);
                     }
                 }
 

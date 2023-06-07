@@ -14,16 +14,16 @@ class ProfileSeeder extends Seeder
      */
     public function run()
     {
-        $users = factory(User::class, 20)->create();
+        $users = User::factory()->count(20)->create();
 
         // Create 20 users with corresponding profiles
         $profiles = $users->map(function ($user) {
-            return factory(Profile::class)->create([
+            return Profile::factory()->create([
                 'user_id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
             ]);
-            return factory(Skill::class)->create([
+            return Skill::factory()->create([
                 'user_id' => $user->id,
             ]);
         });

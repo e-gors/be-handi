@@ -25,7 +25,8 @@ class Post extends Model
         'questions',
         'images',
         'post_url',
-        'visibility'
+        'visibility',
+        'status'
     ];
 
     protected $casts = [

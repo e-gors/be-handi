@@ -91,7 +91,7 @@ class OfferController extends Controller
                     'message' => "Encounter Error while saving your offer!"
                 ]);
             } else {
-                $this->sendNewOfferNotification($workers, $newOffer, $user);
+                // $this->sendNewOfferNotification($workers, $newOffer, $user);
 
                 return response()->json([
                     'code' => 200,

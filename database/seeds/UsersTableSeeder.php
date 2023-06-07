@@ -1,9 +1,9 @@
 <?php
 
-use App\User;
 use App\Skill;
 use App\Profile;
 use App\Category;
+use Database\Factories\NewUserFactory;
 use Faker\Factory as Faker;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +20,7 @@ class UsersTableSeeder extends Seeder
         $faker = Faker::create();
 
         // Create 1000 workers with corresponding profiles
-        $workers = factory(User::class, 1000)->create(['role' => 'Worker'])->each(function ($user) use ($faker) {
+        $workers = NewUserFactory::new()->count(1000)->create(['role' => 'Worker'])->each(function ($user) use ($faker) {
             Profile::create([
                 'user_id' => $user->id,
                 'profile_link' => env('APP_BASE_URL') . "worker/profile/overview/" . $user->uuid,
@@ -43,7 +43,7 @@ class UsersTableSeeder extends Seeder
         });
 
         // Create 1000 clients with corresponding profiles
-        $clients = factory(User::class, 1000)->create(['role' => 'Client'])->each(function ($user) use ($faker) {
+        $clients = NewUserFactory::new()->count(1000)->create(['role' => 'Client'])->each(function ($user) use ($faker) {
             Profile::create([
                 'user_id' => $user->id,
                 'profile_link' => env('APP_BASE_URL') . "client/profile/overview/" . $user->uuid,
