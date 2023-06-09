@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Post;
 use App\Offer;
 use Exception;
 use App\Contract;
@@ -46,7 +47,6 @@ class OfferController extends Controller
             $images = $request->file('images') ? $request->file('images') : null;
             $instruction = $request->instruction ? $request->instruction : null;
             $workers = $request->worker ? json_decode($request->worker) : null;
-            $post = json_decode($request->post);
 
             if (empty($workers)) {
                 return response()->json([
@@ -72,11 +72,13 @@ class OfferController extends Controller
                 }
             }
 
+            $post = Post::find($formValues[0]->post);
+
             $newOffer = Offer::create([
                 'user_id' => $user->id,
                 'profile_id' => $workers[0]->id,
-                'post_id' => isset($post) ? $post->id : null,
-                'title' => $formValues[0]->title,
+                'post_id' => $formValues[0]->post ? $formValues[0]->post : null,
+                'title' => $formValues[0]->title ? $formValues[0]->title : $post->title,
                 'type' => $formValues[0]->type,
                 'days' => isset($formValues[0]->days) ? $formValues[0]->days : null,
                 'rate' => isset($formValues[0]->rate) ? $formValues[0]->rate : null,
@@ -103,15 +105,15 @@ class OfferController extends Controller
         }
     }
 
-    public function accept(Request $request, Offer $offer)
-    {
-        $user = auth()->user();
+    // public function accept(Request $request, Offer $offer)
+    // {
+    //     $user = auth()->user();
 
-        $schedule = Schedule::find(1);
+    //     $schedule = Schedule::find(1);
 
-        $newContract = Contract::create([
-            'offer_id' => $offer->id,
-            'schedule_id' => $schedule->id
-        ]);
-    }
+    //     $newContract = Contract::create([
+    //         'offer_id' => $offer->id,
+    //         'schedule_id' => $schedule->id
+    //     ]);
+    // }
 }

@@ -34,6 +34,7 @@ class PostResource extends JsonResource
             'images' => $this->images ? unserialize($this->images) : null,
             'questions' => $this->questions ? unserialize($this->questions) : null,
             'post_url' => $this->post_url,
+            'status' => $this->status,
             'client' => new ClientResource(User::find($this->user_id)),
             'created_at' => $this->created_at->diffForHumans(),
             'total' => $user->posts->count(),

@@ -54,4 +54,6 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('projects/{id}', 'ProjectController@destroy');
     Route::get('projects', 'ProjectController@index');
     Route::post('choose/proposal/{proposal}/{post}', 'ProposalController@choose');
+    Route::get('contracts', 'ContractController@index');
+    Route::get('user/jobs', 'PostController@userPosts');
 });

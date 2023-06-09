@@ -231,8 +231,8 @@ class ProposalController extends Controller
 
             if ($worker->profile->availability === 'available') {
                 // Check if the worker has a conflicting schedule
-                $startDate = Carbon::parse($request->startDate)->format('Y-m-d');
-                $endDate = Carbon::parse($request->endDate)->format('Y-m-d');
+                $startDate = Carbon::parse($request->startDate)->toDateTimeString();
+                $endDate = Carbon::parse($request->endDate)->toDateTimeString();
 
                 $conflictingContracts = Contract::where('bid_id', $proposal->id)
                     ->where(function ($query) use ($startDate, $endDate) {

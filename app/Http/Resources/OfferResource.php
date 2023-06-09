@@ -20,6 +20,7 @@ class OfferResource extends JsonResource
             'user_id' => $this->user_id,
             'profile_id' => $this->profile_id,
             'post_id' => $this->post_id,
+            'post' => $this->post,
             'title' => $this->title,
             'type' => $this->type,
             'days' => $this->days,
@@ -31,7 +32,6 @@ class OfferResource extends JsonResource
             'created_at' => $this->created_at->diffForHumans(),
             'client' => User::find($this->user_id),
             'worker' => User::find($this->profile_id),
-            'schedule' => $this->schedule,
         ];
     }
 }

@@ -10,7 +10,6 @@ class Offer extends Model
         'user_id',
         'profile_id',
         'post_id',
-        'schedule_id',
         'title',
         'type',
         'days',
@@ -29,10 +28,5 @@ class Offer extends Model
     public function post()
     {
         return $this->belongsTo(Post::class);
-    }
-
-    public function schedule()
-    {
-        return $this->hasOne(schedule::class);
     }
 }
