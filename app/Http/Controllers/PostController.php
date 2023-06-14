@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\PostResource;
+use App\Http\Resources\ClientResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
@@ -140,7 +141,7 @@ class PostController extends Controller
 
                 if ($matchedUsers !== null && !empty($matchedUsers)) {
                     foreach ($matchedUsers as $user) {
-                        // $this->sendNewJobPostNotification($user, $postResource, $authUser);
+                        $this->sendNewJobPostNotification($user, $postResource, $authUser);
                     }
                 }
 
@@ -148,6 +149,7 @@ class PostController extends Controller
                     'code' => 200,
                     'message' => "New job has been posted!",
                     'url' => '/posts/' . $uuid,
+                    'user' => new ClientResource($authUser)
                 ]);
             }
 
@@ -185,6 +187,7 @@ class PostController extends Controller
             $location = $request->location ? $request->location : null;
             $skill = $request->skill ? $request->skill : null;
             $salaryRange = $request->salary_range ? $request->salary_range : null;
+            $type = $request->type ? $request->type : null;
             // $shortlisted = $request->shortlisted ? $request->shortlisted : null;
 
             $query = Post::query();
@@ -212,6 +215,9 @@ class PostController extends Controller
 
             if (!is_null($skill)) {
                 $query->where('skills', 'LIKE', '%' . $skill . '%');
+            }
+            if (!is_null($type)) {
+                $query->where('job_type', $type);
             }
             // if (!is_null($shortlisted)) {
             //     if ($shortlisted == 'true') {

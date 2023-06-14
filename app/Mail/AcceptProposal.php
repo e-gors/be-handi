@@ -15,6 +15,8 @@ class AcceptProposal extends Mailable
     private $proposal;
     private $client;
     private $contract;
+    private $post;
+
     /**
      * Create a new message instance.
      *
@@ -24,12 +26,14 @@ class AcceptProposal extends Mailable
         $worker,
         $proposal,
         $client,
-        $contract
+        $contract,
+        $post
     ) {
         $this->worker = $worker;
         $this->proposal = $proposal;
         $this->client = $client;
         $this->contract = $contract;
+        $this->post = $post;
     }
 
     /**
@@ -45,7 +49,8 @@ class AcceptProposal extends Mailable
                 'worker' => $this->worker,
                 'proposal' => $this->proposal,
                 'client' => $this->client,
-                'contract' => $this->contract
+                'contract' => $this->contract,
+                'post' => $this->post
             ]
         );
     }

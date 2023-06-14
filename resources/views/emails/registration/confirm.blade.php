@@ -77,7 +77,7 @@
             <h1>Hey there {{ $user->first_name }},</h1>
             <p>Welcome to {{ env('APP_NAME') }}, we are helping people to connect for the benefits of each other where others are searching for job while others are looking for skilled workers.</p>
             <p style="margin-top: 20px;">If you are interested in our company, please click the button bellow for your account confirmation. Thank you.</p>
-            <a href="{{ env('APP_BASE_URL') . '/confirmed/'. $user->uuid }}"><button class="button">Verify Email</button></a>
+            <a href="{{ env('APP_BASE_URL') . 'confirmed/'. $user->uuid }}"><button class="button">Verify Email</button></a>
             <div class="thank-you">
                 <p>Thank you,</p>
                 <p>{{env('APP_NAME')}} Company</p>

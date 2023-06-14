@@ -60,10 +60,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(Profile::class);
     }
-    public function socialNetwork()
-    {
-        return $this->hasOne(SocialNetwork::class);
-    }
 
     public function skills()
     {
@@ -90,10 +86,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Bid::class);
     }
 
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
 
     public function offers()
     {
@@ -108,5 +100,31 @@ class User extends Authenticatable implements MustVerifyEmail
     public function projects()
     {
         return $this->hasMany(Project::class);
+    }
+
+    public function tracker()
+    {
+        return $this->hasOne(Tracker::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Deleting event listener to delete associated data
+        static::deleting(function ($user) {
+            $user->profile()->delete();
+            $user->skills()->detach();
+            $user->categories()->detach();
+            $user->posts()->delete();
+            $user->shortlist()->delete();
+            $user->bids()->delete();
+            $user->offers()->delete();
+            $user->ratings()->delete();
+            $user->projects()->delete();
+            $user->tracker()->delete();
+            $user->deleteRelatedFiles();
+            $user->deleteRelatedRecords();
+        });
     }
 }

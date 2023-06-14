@@ -101,8 +101,8 @@
             <img src="{{ asset('storage/assets/handi-logo.png') }}" alt="logo" id="logo">
         </div>
         <div id="main">
-            <h1 class="greeting">Hello {{ $user['full_name'] }},</h1>
-            <p>You have receive an offer from {{ $client[0]->fullname }}. Here are the details: </p>
+            <h1 class="greeting">Hello {{ $worker[0]->fullname }},</h1>
+            <p>You have receive an offer from {{ $client->full_name }}. Here are the details: </p>
 
             <div class="details">
                 <div class="detail">
@@ -117,7 +117,7 @@
                 @endif
                 <div class="detail">
                     <p class="label">Client: </p>
-                    <p class="value">{{ $client[0]->fullname }}</p>
+                    <p class="value">{{ $client->full_name }}</p>
                 </div>
                 <div class="detail">
                     <p class="label">Job Type: </p>
@@ -132,10 +132,10 @@
                     <p class="value">{{ $offer->budget }}</p>
                     @endif
                 </div>
-                @if(isset($offer->instruction))
+                @if(isset($offer->instructions))
                 <div class="message">
                     <p class="label">Instruction: </p>
-                    <dive class="value">{!! $offer->instruction !!}</dive>
+                    <dive class="value">{!! $offer->instructions !!}</dive>
                 </div>
                 @endif
             </div>

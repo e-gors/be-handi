@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ClientResource;
+use App\Http\Resources\ContractorResource;
 use App\Http\Resources\WorkerResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -17,8 +18,9 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $workers = User::where('role', 'Worker')->get();
-        return WorkerResource::collection($workers);
+        $workers = User::with(['profile', 'ratings'])->where('role', "Worker")->get();
+
+        return ContractorResource::collection($workers);
     }
     public function filteredWorker($uuid)
     {
@@ -26,13 +28,14 @@ class ProfileController extends Controller
 
         return WorkerResource::collection($worker);
     }
-    public function worker(Request $request)
+    public function workers(Request $request)
     {
         $search = $request->search ? $request->search : null;
         $category = $request->category ? $request->category : null;
         $location = $request->location ? $request->location : null;
         $skill = $request->skill ? $request->skill : null;
         $salaryRange = $request->salary_range ? $request->salary_range : null;
+        $userId = $request->user_id ? $request->user_id : null;
 
         $query = User::query();
 
@@ -45,7 +48,6 @@ class ProfileController extends Controller
                     ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
             });
         }
-
 
         if (!is_null($category)) {
             $query->whereHas('categories', function ($q) use ($category) {
@@ -72,6 +74,11 @@ class ProfileController extends Controller
                         ->orWhereBetween('rate', [$salaryRange]);
                 });
             });
+        }
+
+        // Exclude the authenticated user
+        if (!is_null($userId)) {
+            $query->where('id', '!=', $userId);
         }
 
         return WorkerResource::collection($this->paginated($query, $request));
@@ -161,10 +168,9 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         $background = $request->background;
-        $messageWithBr = nl2br($background);
 
         $newProfile = Profile::where('user_id', $user->id)->update([
-            'background' => $messageWithBr
+            'background' => $background
         ]);
 
         if (!$newProfile) {
@@ -176,6 +182,27 @@ class ProfileController extends Controller
         return response()->json([
             'code' => 200,
             'message' => 'Background successfully added!',
+            'user' => $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user),
+        ]);
+    }
+    public function updateAbout(Request $request)
+    {
+        $user = auth()->user();
+        $about = $request->about;
+
+        $newProfile = Profile::where('user_id', $user->id)->update([
+            'about' => $about
+        ]);
+
+        if (!$newProfile) {
+            return response()->json([
+                'code' => 500,
+                'message' => 'Error occured! Failed to save About.',
+            ]);
+        }
+        return response()->json([
+            'code' => 200,
+            'message' => 'About successfully added!',
             'user' => $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user),
         ]);
     }
@@ -299,5 +326,102 @@ class ProfileController extends Controller
                 'user' => $user->role === "Worker" ? new WorkerResource($user) : new ClientResource($user)
             ]);
         }
+    }
+
+    public function updateFullname(Request $request)
+    {
+        $auth = auth()->user();
+        $profile = Profile::where('user_id', $auth->id)->first();
+        $user = User::find($auth->id);
+
+        $user->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name
+        ]);
+
+        if ($profile) {
+            $profile->update([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name
+            ]);
+        } else {
+            return response()->json([
+                'code' => 500,
+                'message' => "No profile has been found!",
+            ]);
+        }
+
+        return response()->json([
+            'code' => 200,
+            'message' => "Fullname updated successfully!",
+            'user' => $user->role === 'Client' ? new CLientResource($user) : new WorkerResource($user)
+        ]);
+    }
+    public function updateAddress(Request $request)
+    {
+        $auth = auth()->user();
+        $profile = Profile::where('user_id', $auth->id)->first();
+
+        if ($profile) {
+            $profile->update([
+                'address' => $request->address,
+            ]);
+        } else {
+            return response()->json([
+                'code' => 500,
+                'message' => "No profile has been found!",
+            ]);
+        }
+
+        return response()->json([
+            'code' => 200,
+            'message' => "Address updated successfully!",
+            'user' => $auth->role === 'Client' ? new CLientResource($auth) : new WorkerResource($auth)
+        ]);
+    }
+
+    public function updateEmail(Request $request)
+    {
+
+        $email = $request->email;
+        $auth = auth()->user();
+        $user = User::find($auth->id);
+        $existingUser = User::where('email', $email)->first();
+
+        if (empty($existingUser)) {
+            $user->update([
+                'email' => $email
+            ]);
+
+            return response()->json([
+                'code' => 200,
+                'message' => "Your email has been updated!",
+                'user' => $user->role === "Client" ? new ClientResource($user) : new WorkerResource($user)
+            ]);
+        } else {
+            return response()->json([
+                'code' => 500,
+                'message' => "Email is taken!"
+            ]);
+        }
+    }
+
+    public function updatePhone(Request $request)
+    {
+
+        $phone = $request->contact_number;
+        $auth = auth()->user();
+
+        $user = User::find($auth->id);
+
+        $user->update([
+            'contact_number' => $phone
+        ]);
+
+        return response()->json([
+            'code' => 200,
+            'message' => "Your email has been updated!",
+            'user' => $user->role === "Client" ? new ClientResource($user) : new WorkerResource($user)
+        ]);
     }
 }

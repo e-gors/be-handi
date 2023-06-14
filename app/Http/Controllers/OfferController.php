@@ -20,8 +20,16 @@ class OfferController extends Controller
     {
         $search = $request->search ? $request->search : null;
         $status = $request->status ? $request->status : null;
+        $type = $request->type ? $request->type : null;
 
+        $user = auth()->user();
         $query = Offer::query();
+
+        if ($user->role === 'Client') {
+            $query->where('user_id', $user->id);
+        } else {
+            $query->where('profile_id', $user->id);
+        }
 
         if (!is_null($search)) {
             $query->join('users', 'offers.user_id', '=', 'users.id')
@@ -35,6 +43,9 @@ class OfferController extends Controller
         if (!is_null($status)) {
             $query->where('status', $status);
         }
+        if (!is_null($type)) {
+            $query->where('type', $type);
+        }
 
         return OfferResource::collection($this->paginated($query, $request));
     }
@@ -46,9 +57,9 @@ class OfferController extends Controller
             $formValues = json_decode($request->formValues);
             $images = $request->file('images') ? $request->file('images') : null;
             $instruction = $request->instruction ? $request->instruction : null;
-            $workers = $request->worker ? json_decode($request->worker) : null;
+            $worker = $request->worker ? json_decode($request->worker) : null;
 
-            if (empty($workers)) {
+            if (empty($worker)) {
                 return response()->json([
                     'code' => 500,
                     'message' => "Contractor field is required!"
@@ -74,16 +85,22 @@ class OfferController extends Controller
 
             $post = Post::find($formValues[0]->post);
 
+            if (isset($formValues[0]->rate)) {
+                $removedComma = str_replace(',', '', $formValues[0]->rate);
+            } else {
+                $removedComma = str_replace(',', '', $formValues[0]->budget);
+            }
+
             $newOffer = Offer::create([
                 'user_id' => $user->id,
-                'profile_id' => $workers[0]->id,
+                'profile_id' => $worker[0]->id,
                 'post_id' => $formValues[0]->post ? $formValues[0]->post : null,
                 'title' => $formValues[0]->title ? $formValues[0]->title : $post->title,
                 'type' => $formValues[0]->type,
                 'days' => isset($formValues[0]->days) ? $formValues[0]->days : null,
-                'rate' => isset($formValues[0]->rate) ? $formValues[0]->rate : null,
-                'budget' => isset($formValues[0]->budget) ? $formValues[0]->budget : null,
-                'instruction' => isset($instruction) ? $instruction : null,
+                'rate' => isset($formValues[0]->rate) ? $removedComma : null,
+                'budget' => isset($formValues[0]->budget) ? $removedComma : null,
+                'instructions' => isset($instruction) ? $instruction : null,
                 'images' => isset($images) ? serialize($imageUrls) : null,
             ]);
 
@@ -93,7 +110,7 @@ class OfferController extends Controller
                     'message' => "Encounter Error while saving your offer!"
                 ]);
             } else {
-                // $this->sendNewOfferNotification($workers, $newOffer, $user);
+                $this->sendNewOfferNotification($worker, $newOffer, $user);
 
                 return response()->json([
                     'code' => 200,

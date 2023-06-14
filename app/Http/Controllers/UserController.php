@@ -163,12 +163,17 @@ class UserController extends Controller
                     $this->attachSkillsToUser($newUser, $SkillCategoryIds, $skillSubCategoryIds);
 
                     DB::commit();
-                    // $this->confirmRegistrationMail($newUser);
+
+                    //send email to new worker
+                    $this->confirmRegistrationMail($newUser);
+
+                    $token = $newUser->createToken(env('APP_URL'));
 
                     return response()->json([
                         'code' => 200,
-                        'message' => 'Congratulations! You are now part of the team. Please see you email for verfification.',
-                        'user' => $newUser,
+                        'access_token' => $token->accessToken,
+                        'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
+                        'user' => new WorkerResource($newUser)
                     ]);
                 }
                 return response()->json([
@@ -202,12 +207,16 @@ class UserController extends Controller
 
                     DB::commit();
 
-                    // $this->confirmRegistrationMail($newUser);
+                    //send email to new client
+                    $this->confirmRegistrationMail($newUser);
+
+                    $token = $newUser->createToken(env('APP_URL'));
 
                     return response()->json([
                         'code' => 200,
-                        'message' => 'Congratulations! You are now part of the team. Please see you email for verfification.',
-                        'user' => $newUser,
+                        'access_token' => $token->accessToken,
+                        'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
+                        'user' => new ClientResource($newUser)
                     ]);
                 }
                 return response()->json([
@@ -301,7 +310,23 @@ class UserController extends Controller
 
         return response()->json([
             'code' => 200,
-            'message' => "Your account is successfuly verified. Please proceed to login!",
+            'message' => "Your account is successfuly verified!",
+            'user' => $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user)
+        ]);
+    }
+    public function updatePassword(Request $request)
+    {
+        $password = $request->password;
+        $auth = auth()->user();
+        $user = User::find($auth->id);
+
+        $user->update([
+            'password' => Hash::make($password)
+        ]);
+
+        return response()->json([
+            'code' => 200,
+            'message' => "Password updated successfully!",
         ]);
     }
 
@@ -347,8 +372,16 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy()
     {
-        //
+        $auth = auth()->user();
+
+        $user = User::find($auth->id);
+        $user->delete();
+
+        return response()->json([
+            'code' => 200,
+            'message' => "Your account has been deleted!"
+        ]);
     }
 }

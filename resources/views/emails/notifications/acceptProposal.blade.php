@@ -1,3 +1,4 @@
+use Illuminate\Support\Carbon;
 <!DOCTYPE html>
 <html lang="en">
 
@@ -104,28 +105,21 @@
             <img src="{{ asset('storage/assets/handi-logo.png') }}" alt="logo" id="logo">
         </div>
         <div id="main">
-            <h1 class="greeting">Hello {{ $user[0]->full_name }},</h1>
-            <p>We wanted to inform you that a new bid has been placed on your project titled "{{ $post->title }}". Here are the details:</p>
+            <h1 class="greeting">Hello {{ $worker->full_name }},</h1>
+            <p>Your proposal has been accepted by the client with the project titled "{{ $post->title }}". Here are the details:</p>
             <div class="details">
                 <div class="detail">
-                    <p class="label">Bid Amount: </p>
-                    <p class="value">{{ $newProposal->rate }}</p>
+                    <p class="label">Start Date: </p>
+                    <p class="value">{{ \Carbon\Carbon::parse( $contract->start_date)->format('F j, Y') }}</p>
                 </div>
                 <div class="detail">
-                    <p class="label">Bidder Name: </p>
-                    <p class="value">{{ $worker->full_name }}</p>
-                </div>
-                <div class="detail">
-                    <p class="label">Bidder Email: </p>
-                    <p class="value">{{ $worker->email }}</p>
-                </div>
-                <div class="message">
-                    <p class="label">Bidder Proposal: </p>
-                    <p class="value">{!! $newProposal->proposal !!}</p>
+                    <p class="label">End Date: </p>
+                    <p class="value">{{ \Carbon\Carbon::parse( $contract->end_date)->format('F j, Y') }}</p>
                 </div>
             </div>
+            <p>Contact your new client with this number: {{ $client->contact_number }}</p>
 
-            <a href="{{ $post->post_url }}"><button class="button">Visit My Job Post</button></a>
+
 
             <p>Best regards,</p>
             <p>{{env('APP_NAME')}}</p>

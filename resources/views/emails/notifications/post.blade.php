@@ -137,7 +137,7 @@
                 </div>
                 <div class="message">
                     <p class="label">Description: </p>
-                    <dive class="value">{!! $post->description !!}</dive>
+                    <div>{!! $post->description !!}</div>
                 </div>
             </div>
 

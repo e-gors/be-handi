@@ -122,7 +122,7 @@ class ProposalController extends Controller
             })->get();
 
             // send notification to the post owner
-            // $this->sendNewProposalNotification($owner, $post, $user, $newProposal);
+            $this->sendNewProposalNotification($owner, $post, $user, $newProposal);
 
             return response()->json([
                 'code' => 200,
@@ -236,10 +236,19 @@ class ProposalController extends Controller
 
                 $conflictingContracts = Contract::where('bid_id', $proposal->id)
                     ->where(function ($query) use ($startDate, $endDate) {
-                        $query->whereBetween('start_date', [$startDate, $endDate])
-                            ->orWhereBetween('end_date', [$startDate, $endDate])
+                        $query->where(function ($subQuery) use ($startDate, $endDate) {
+                            $subQuery->whereBetween('start_date', [$startDate, $endDate])
+                                ->whereBetween('end_date', [$startDate, $endDate]);
+                        })->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                            $subQuery->orWhere('start_date', '>=', $startDate)
+                                ->where('end_date', '<=', $endDate);
+                        })
                             ->orWhere(function ($subQuery) use ($startDate, $endDate) {
                                 $subQuery->where('start_date', '<=', $startDate)
+                                    ->where('end_date', '>=', $startDate);
+                            })
+                            ->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                                $subQuery->where('start_date', '<=', $endDate)
                                     ->where('end_date', '>=', $endDate);
                             });
                     })
@@ -254,11 +263,17 @@ class ProposalController extends Controller
                         'status' => 'in progress',
                     ]);
 
+                    //update contract status from posted to contracted
                     $post->update([
                         'status' => 'contracted'
                     ]);
 
-                    // $this->sendAcceptOfferNotification($worker, $proposal, $client, $contract);
+                    //update proposal status from pending to accepted
+                    $proposal->update([
+                        'status' => 'accepted'
+                    ]);
+
+                    $this->sendAcceptProposalNotification($worker, $proposal, $client, $contract, $post);
 
                     return response()->json([
                         'code' => 200,

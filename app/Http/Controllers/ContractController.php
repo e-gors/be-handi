@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Contract;
+use App\Http\Resources\ClientResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\ContractResource;
+use App\Http\Resources\WorkerResource;
 
 class ContractController extends Controller
 {
@@ -21,6 +23,7 @@ class ContractController extends Controller
 
             $user = auth()->user();
             $query = Contract::query();
+            $query->where('status', 'in progress');
 
             if ($type) {
                 if ($type !== 'all') {
@@ -72,11 +75,39 @@ class ContractController extends Controller
                     });
                 });
 
-            // dd($query->toSql());
 
             return ContractResource::collection($this->paginated($query, $request));
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function completed(Contract $contract)
+    {
+        $user = auth()->user();
+
+        if ($contract) {
+            if ($contract->status !== 'in progress') {
+                return response()->json([
+                    'code' => 500,
+                    'message' => 'The contract is already completed or still on pending!',
+                ]);
+            } else {
+                $contract->update([
+                    'status' => 'completed'
+                ]);
+
+                return response()->json([
+                    'code' => 200,
+                    'message' => 'Your contract is completed!',
+                    'user' => $user->role === 'Client' ? new ClientResource($user) : new WorkerResource($user)
+                ]);
+            }
+        } else {
+            return response()->json([
+                'code' => 404,
+                'message' => "Contract not found!"
+            ]);
         }
     }
 }

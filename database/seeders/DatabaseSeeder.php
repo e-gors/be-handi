@@ -18,5 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CategorySeeder::class);
         $this->call(SkillSeeder::class);
         $this->call(LocationSeeder::class);
+        $this->call(NotificationTypeSeeder::class);
     }
 }

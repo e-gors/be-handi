@@ -11,22 +11,22 @@ class NewOfferMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private $client;
+    private $worker;
     private $offer;
-    private $user;
+    private $client;
     /**
      * Create a new message instance.
      *
      * @return void
      */
     public function __construct(
-        $client,
+        $worker,
         $offer,
-        $user
+        $client
     ) {
-        $this->client = $client;
+        $this->worker = $worker;
         $this->offer = $offer;
-        $this->user = $user;
+        $this->client = $client;
     }
 
     /**
@@ -39,9 +39,9 @@ class NewOfferMail extends Mailable
         return $this->markdown(
             'emails.notifications.offer',
             [
-                'client' => $this->client,
+                'worker' => $this->worker,
                 'offer' => $this->offer,
-                'user' => $this->user
+                'client' => $this->client
             ]
         )->subject('New Job Offer');
     }

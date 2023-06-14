@@ -3,7 +3,9 @@
 namespace App\Http\Resources;
 
 use App\Offer;
+use App\Rating;
 use App\Profile;
+use App\Contract;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class WorkerResource extends JsonResource
@@ -52,6 +54,7 @@ class WorkerResource extends JsonResource
             'role' => $this->role,
             'contact_number' => $this->contact_number,
             'email_verified_at' => $this->email_verified_at,
+            'created_at' => $this->created_at,
             'categories' => CategoryResource::collection($this->groupedCategories($this->categories)),
             'skills' => SkillResource::collection($this->groupedCategories($this->skills)),
             'categoryChildren' => CategoryResource::collection($this->categories->whereNotNull('parent_id')->toArray()),
@@ -60,7 +63,10 @@ class WorkerResource extends JsonResource
             'shortlist' => ShortlistResource::collection($this->shortlist),
             'bids' => ShortlistResource::collection($this->bids),
             'offers' => OfferResource::collection(Offer::where('profile_id', $this->id)->get()),
-            'projects' => ProjectResource::collection($this->projects)
+            'projects' => ProjectResource::collection($this->projects),
+            'contracts' => ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get()),
+            'ratings' => RatingResource::collection(Rating::where('worker_id', $this->id)->get()),
+            'tracker' => new TrackerResource($this->tracker),
         ];
     }
 }

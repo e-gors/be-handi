@@ -2,25 +2,19 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Rating extends Model
+class Tracker extends Model
 {
-
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
-        'worker_id',
-        'comment',
-        'rating'
+        'profile_view',
+        'search_result',
     ];
-
-    public function reviewable()
-    {
-        return $this->morphTo();
-    }
 
     public function user()
     {

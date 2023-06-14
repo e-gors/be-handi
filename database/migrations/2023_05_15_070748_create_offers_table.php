@@ -25,7 +25,7 @@ class CreateOffersTable extends Migration
             $table->decimal('budget', 12, 2)->nullable();
             $table->text('instructions')->nullable();
             $table->text('images')->nullable();
-            $table->enum('status', ['pending', 'accepted', 'declined'])->default('pending');
+            $table->enum('status', ['pending', 'accepted', 'declined', 'withdrawn'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });
