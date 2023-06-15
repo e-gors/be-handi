@@ -71,18 +71,15 @@ class UsersTableSeeder extends Seeder
         $parentCategories = Category::whereNull('parent_id')->get();
 
         foreach ($parentCategories as $parentCategory) {
-            // Check if the parent category has fewer than 2 children
-            if ($parentCategory->children()->count() < 2) {
-                // Retrieve additional categories to meet the minimum requirement
-                $additionalCategoryIds = Category::where('parent_id', $parentCategory->id)
-                    ->inRandomOrder()
-                    ->limit(2 - $parentCategory->children()->count())
-                    ->pluck('id')
-                    ->toArray();
+            // Retrieve additional categories to meet the minimum requirement
+            $additionalCategoryIds = Category::where('parent_id', $parentCategory->id)
+                ->inRandomOrder()
+                ->limit(3)
+                ->pluck('id')
+                ->toArray();
 
-                // Attach the additional categories to the user
-                $user->categories()->attach($additionalCategoryIds);
-            }
+            // Attach the additional categories to the user
+            $user->categories()->attach($additionalCategoryIds);
         }
     }
 
@@ -91,18 +88,15 @@ class UsersTableSeeder extends Seeder
         $parentSkills = Skill::whereNull('parent_id')->get();
 
         foreach ($parentSkills as $parentSkill) {
-            // Check if the parent skill has fewer than 2 children
-            if ($parentSkill->children()->count() < 2) {
-                // Retrieve additional skills to meet the minimum requirement
-                $additionalSkills = Skill::where('parent_id', $parentSkill->id)
-                    ->inRandomOrder()
-                    ->limit(2 - $parentSkill->children()->count())
-                    ->pluck('id')
-                    ->toArray();
+            // Retrieve additional skills to meet the minimum requirement
+            $additionalSkills = Skill::where('parent_id', $parentSkill->id)
+                ->inRandomOrder()
+                ->limit(3)
+                ->pluck('id')
+                ->toArray();
 
-                // Attach the additional skills to the user
-                $user->skills()->attach($additionalSkills);
-            }
+            // Attach the additional skills to the user
+            $user->skills()->attach($additionalSkills);
         }
     }
 }
