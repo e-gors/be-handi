@@ -16,14 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function() {
-//     return new ConfirmRegistration();
-// });
-// Route::get('/confirmed/{id}', 'UserController@confirmedUser');
+Route::get('/', function () {
+    return view('welcome');
+});
 
-// Route::get('/notification/proposal', function () {
-//     return new NewProposalMail();
-// });
-// Route::get('/notification/post', function () {
-//     return new NewJobPost();
-// });
