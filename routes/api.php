@@ -36,7 +36,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('new/shortlist/user/{id}', 'ShortlistController@addUserToShortlist');
     Route::get('verify-email/{id}', 'UserController@confirmedUser');
     Route::post('account/update/password', 'UserController@updatePassword');
-Route::delete('account/terminate', 'UserController@destroy');
+    Route::delete('account/terminate', 'UserController@destroy');
 
     //jobs
     Route::post('new/job-post', 'PostController@post');
@@ -81,4 +81,7 @@ Route::delete('account/terminate', 'UserController@destroy');
     //contracts
     Route::get('contracts', 'ContractController@index');
     Route::post('contract/complete/{contract}', 'ContractController@completed');
+
+    //contacts
+    Route::post('contact-us', 'ContactController@contact');
 });
