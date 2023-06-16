@@ -66,7 +66,7 @@ class JobPostSeeder extends Seeder
 
             // Determine rate, budget, and days based on the job type
             if ($newPost->job_type === 'Daily Rate') {
-                $newPost->days = $faker->randomNumber(2);
+                $newPost->days = $faker->numberBetween(1, 40) . ' days';
                 $newPost->rate = $faker->randomFloat(2, 10, 50);
                 $newPost->budget = null;
             } else {
