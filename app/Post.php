@@ -51,4 +51,10 @@ class Post extends Model
     {
         return $this->hasMany(Bid::class);
     }
+
+      public function schedule()
+    {
+        return $this->hasMany(schedule::class);
+    }
+    
 }
