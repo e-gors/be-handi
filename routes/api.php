@@ -69,7 +69,6 @@ Route::middleware('auth:api')->group(function () {
     Route::post('update/social-networks', 'ProfileController@updateSocialNetwork');
     Route::delete('delete/social-networks/{params}', 'ProfileController@removeSocialNetworks');
     Route::delete('projects/{id}', 'ProjectController@destroy');
-<<<<<<< Updated upstream
     Route::post('account/update/email', 'ProfileController@updateEmail');
     Route::post('account/update/phone', 'ProfileController@updatePhone');
     Route::post('account/update/address', 'ProfileController@upateAddress');
@@ -85,12 +84,10 @@ Route::middleware('auth:api')->group(function () {
 
     //contacts
     Route::post('contact-us', 'ContactController@contact');
-});
-=======
+
     Route::get('projects', 'ProjectController@index');
     Route::post('choose/proposal/{proposal}/{post}', 'ProposalController@choose');
     Route::get('admin/users','AdminController@users');
     Route::get('job_post','JobPostController@jobPost');
     Route::get('contracts','ContractController@Contracts');
 });
->>>>>>> Stashed changes
