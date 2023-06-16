@@ -60,13 +60,13 @@ class WorkerResource extends JsonResource
             'categoryChildren' => CategoryResource::collection($this->categories->whereNotNull('parent_id')->toArray()),
             'skillChildren' => SkillResource::collection($this->skills->whereNotNull('parent_id')->toArray()),
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
-            'shortlist' => ShortlistResource::collection($this->shortlist),
-            'bids' => ShortlistResource::collection($this->bids),
-            'offers' => OfferResource::collection(Offer::where('profile_id', $this->id)->get()),
-            'projects' => ProjectResource::collection($this->projects),
-            'contracts' => ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get()),
-            'ratings' => RatingResource::collection(Rating::where('worker_id', $this->id)->get()),
-            'tracker' => new TrackerResource($this->tracker),
+            'shortlists' => $this->shortlists ? ShortlistResource::collection($this->shortlists) : null,
+            'bids' => $this->bids ? ShortlistResource::collection($this->bids) : null,
+            'offers' => $this->offers ? OfferResource::collection(Offer::where('profile_id', $this->id)->get()) : null,
+            'projects' => $this->projects ? ProjectResource::collection($this->projects) : null,
+            'contracts' => $this->contracts ? ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get()) : null,
+            'ratings' => $this->ratings ? RatingResource::collection(Rating::where('worker_id', $this->id)->get()) : null,
+            'tracker' => $this->tracker ? new TrackerResource($this->tracker) : null,
         ];
     }
 }

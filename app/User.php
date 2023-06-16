@@ -76,7 +76,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Post::class);
     }
 
-    public function shortlist()
+    public function shortlists()
     {
         return $this->hasMany(Shortlist::class);
     }
@@ -117,7 +117,7 @@ class User extends Authenticatable implements MustVerifyEmail
             $user->skills()->detach();
             $user->categories()->detach();
             $user->posts()->delete();
-            $user->shortlist()->delete();
+            $user->shortlists()->delete();
             $user->bids()->delete();
             $user->offers()->delete();
             $user->ratings()->delete();

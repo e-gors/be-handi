@@ -29,11 +29,10 @@ class ClientResource extends JsonResource
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
-            'shortlist' => ShortlistResource::collection($this->shortlist),
-            'offers' => OfferResource::collection(Offer::where('user_id', $this->id)->get()),
-            'contracts' => $this->posts,
-            'jobs' => $this->posts->where('status', 'posted')->all(),
-            'contracts' => ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get())
+            'shortlists' => $this->shortlists ? ShortlistResource::collection($this->shortlists) : null,
+            'offers' => $this->offers ? OfferResource::collection(Offer::where('user_id', $this->id)->get()) : null,
+            'jobs' => $this->jobs ? $this->posts->where('status', 'posted')->all() : null,
+            'contracts' => $this->contracts ? ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get()) : null
         ];
     }
 }
