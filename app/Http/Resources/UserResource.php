@@ -19,31 +19,7 @@ class UserResource extends JsonResource
      * @return array
      */
 
-    private function groupedCategories($categories)
-    {
-        foreach ($categories as $category) {
-            if ($category->parent_id == null) {
-                $nestedCategories[$category->id] = [
-                    'id' => $category->id,
-                    'parent_id' => $category->parent_id,
-                    'name' => $category->name,
-                    'children' => [],
-                ];
-            } else {
-                $nestedCategories[$category->parent_id]['children'][] = [
-                    'id' => $category->id,
-                    'parent_id' => $category->parent_id,
-                    'name' => $category->name,
-                ];
-                $categoryChildren['children'] = [
-                    'name' => $category->name,
-                ];
-            }
-        }
-
-        return array_values($nestedCategories);
-    }
-
+    
     public function toArray($request)
     {
         // return parent::toArray($request);
