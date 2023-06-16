@@ -86,9 +86,9 @@ Route::middleware('auth:api')->group(function () {
     //contacts
     Route::post('contact-us', 'ContactController@contact');
 
-    Route::get('projects', 'ProjectController@index');
-    Route::post('choose/proposal/{proposal}/{post}', 'ProposalController@choose');
+
+    //addmin
     Route::get('admin/users','AdminController@users');
     Route::get('job_post','JobPostController@jobPost');
-    Route::get('contracts','ContractController@Contracts');
+    // Route::get('contracts','ContractController@Contracts');
 });
