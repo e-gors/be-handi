@@ -30,8 +30,8 @@ class OfferResource extends JsonResource
             'images' => unserialize($this->images),
             'status' => $this->status,
             'created_at' => $this->created_at->diffForHumans(),
-            'client' => User::find($this->user_id),
             'worker' => User::find($this->profile_id),
+            'client' => User::find($this->user_id)
         ];
     }
 }

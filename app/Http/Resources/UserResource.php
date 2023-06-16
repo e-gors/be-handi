@@ -58,12 +58,6 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'contact_number' => $this->contact_number,
             'email_verified_at' => $this->email_verified_at,
-            'categories' => CategoryResource::collection($this->groupedCategories($this->categories)),
-            'skills' => SkillResource::collection($this->groupedCategories($this->skills)),
-            'categoryChildren' => CategoryResource::collection($this->categories->whereNotNull('parent_id')->toArray()),
-            'skillChildren' => SkillResource::collection($this->skills->whereNotNull('parent_id')->toArray()),
-            'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
-            'shortlist' => ShortlistResource::collection($this->shortlist),
             // 'bids' => ShortlistResource::collection($this->bids),
         ];
     }

@@ -55,6 +55,7 @@ Route::middleware('auth:api')->group(function () {
     //offers
     Route::get('offers', 'OfferController@index');
     Route::post('offer/accept/{offer}', 'OfferController@accept');
+    Route::post('offer/cancel/{offer}', 'OfferController@cancel');
     Route::post('new/job-offer', 'OfferController@store');
 
     //profiles

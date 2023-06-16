@@ -29,6 +29,8 @@ class ContractController extends Controller
                 if ($type !== 'all') {
                     $query->whereHas('post', function ($query) use ($type) {
                         $query->where('job_type', $type);
+                    })->orWhereHas('offer', function ($query) use ($type) {
+                        $query->where('type', $type);
                     });
                 }
             }

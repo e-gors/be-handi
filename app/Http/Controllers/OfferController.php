@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Bid;
 use App\Post;
 use App\Offer;
 use Exception;
@@ -11,6 +12,8 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\OfferResource;
+use App\Http\Resources\WorkerResource;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -95,7 +98,6 @@ class OfferController extends Controller
                 'user_id' => $user->id,
                 'profile_id' => $worker[0]->id,
                 'post_id' => $formValues[0]->post ? $formValues[0]->post : null,
-                'title' => $formValues[0]->title ? $formValues[0]->title : $post->title,
                 'type' => $formValues[0]->type,
                 'days' => isset($formValues[0]->days) ? $formValues[0]->days : null,
                 'rate' => isset($formValues[0]->rate) ? $removedComma : null,
@@ -122,15 +124,59 @@ class OfferController extends Controller
         }
     }
 
-    // public function accept(Request $request, Offer $offer)
-    // {
-    //     $user = auth()->user();
+    public function accept(Offer $offer)
+    {
+        $user = auth()->user();
+        $post = Post::find($offer->post_id);
+        $bid = $post ? Bid::find($post->bid_id) : null;
 
-    //     $schedule = Schedule::find(1);
+        $days = "21-30 days";
+        $startDay = Carbon::parse('next monday')->startOfWeek(); // Start date as next Monday
+        $dayRange = explode('-', $days);
+        $pattern = '/(\d+)/'; // Regular expression pattern to match digits
 
-    //     $newContract = Contract::create([
-    //         'offer_id' => $offer->id,
-    //         'schedule_id' => $schedule->id
-    //     ]);
-    // }
+        preg_match($pattern, $dayRange[1], $matches);
+        $endDay = $startDay->copy()->addDays($matches[0])->endOfWeek(); // End date as start date + number of days
+
+        $startDateString = $startDay->toDateString();
+        $endDateString = $endDay->toDateString();
+
+        $newContracts = Contract::create([
+            'post_id' => $post ? $post->id : null,
+            'bid_id' => $bid ? $bid->id : null,
+            'offer_id' => $offer->id,
+            'start_date' => $startDateString,
+            'end_date' => $endDateString,
+            'status' => 'in progress'
+        ]);
+
+        if ($newContracts) {
+            return response()->json([
+                'code' => 200,
+                'message' => "You accepted an offer",
+                'user' => new WorkerResource($user),
+            ]);
+        }
+    }
+
+    public function cancel(Offer $offer)
+    {
+        $user = auth()->user();
+        if ($offer) {
+            $offer->update([
+                'status' => 'declined'
+            ]);
+
+            return response()->json([
+                'code' => 200,
+                'message' => 'You successfully decline offer!',
+                'user' => new WorkerResource($user)
+            ]);
+        } else {
+            return response()->json([
+                'code' => 404,
+                'message' => 'Offer not found!',
+            ]);
+        }
+    }
 }

@@ -10,7 +10,6 @@ class Offer extends Model
         'user_id',
         'profile_id',
         'post_id',
-        'title',
         'type',
         'days',
         'rate',
@@ -28,5 +27,10 @@ class Offer extends Model
     public function post()
     {
         return $this->belongsTo(Post::class);
+    }
+
+    public function worker()
+    {
+        return $this->belongsTo(Profile::class, 'profile_id', 'user_id');
     }
 }

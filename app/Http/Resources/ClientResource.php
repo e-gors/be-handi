@@ -31,8 +31,8 @@ class ClientResource extends JsonResource
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
             'shortlists' => $this->shortlists ? ShortlistResource::collection($this->shortlists) : null,
             'offers' => $this->offers ? OfferResource::collection(Offer::where('user_id', $this->id)->get()) : null,
-            'jobs' => $this->jobs ? $this->posts->where('status', 'posted')->all() : null,
-            'contracts' => $this->contracts ? ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get()) : null
+            'jobs' => $this->posts ? $this->posts->where('status', 'posted')->all() : null,
+            'contracts' => ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get())
         ];
     }
 }

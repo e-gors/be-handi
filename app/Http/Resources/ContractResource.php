@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Profile;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,7 +25,7 @@ class ContractResource extends JsonResource
             }),
             'bid' => $this->whenLoaded('bid', function () {
                 return $this->bid;
-            }),
+            }) ?? $this->offer->worker,
             'offer' => $this->whenLoaded('offer', function () {
                 return $this->offer;
             }),

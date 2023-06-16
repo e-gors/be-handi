@@ -104,4 +104,9 @@ class Profile extends Model
         return $this->belongsToMany(User::class, 'shortlists', 'profile_id', 'user_id')
             ->where('favorite_type', 'profile');
     }
+
+    public function offers()
+    {
+        return $this->hasMany(Offer::class);
+    }
 }
