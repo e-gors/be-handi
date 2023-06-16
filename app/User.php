@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\ShortList;
 use Illuminate\Support\Carbon;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
@@ -78,7 +79,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function shortlists()
     {
-        return $this->hasMany(Shortlist::class);
+        return $this->hasMany(ShortList::class);
     }
 
     public function bids()

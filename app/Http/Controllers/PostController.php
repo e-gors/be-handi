@@ -23,7 +23,6 @@ class PostController extends Controller
             $location = $request->location ? $request->location : null;
             $skill = $request->skill ? $request->skill : null;
             $salaryRange = $request->salary_range ? $request->salary_range : null;
-            // $shortlisted = $request->shortlisted ? $request->shortlisted : null;
 
             $query = Post::query();
             $query->where('visibility', 'Public');
@@ -51,20 +50,6 @@ class PostController extends Controller
             if (!is_null($skill)) {
                 $query->where('skills', 'LIKE', '%' . $skill . '%');
             }
-            // if (!is_null($shortlisted)) {
-            //     if ($shortlisted == 'true') {
-            //         $query->whereHas('shortlist');
-            //     } elseif ($shortlisted == 'false') {
-            //         $query->whereDoesntHave('shortlist');
-            //     }
-            // }
-
-            // if (!is_null($salaryRange)) {
-            //     $query->where(function ($q) use ($salaryRange) {
-            //         $q->whereNull('rate')
-            //             ->orWhereBetween('rate', [0, $salaryRange]);
-            //     });
-            // }
 
             $query->orderBy('posts.created_at', 'desc');
             return PostResource::collection($this->paginated($query, $request));
@@ -219,20 +204,6 @@ class PostController extends Controller
             if (!is_null($type)) {
                 $query->where('job_type', $type);
             }
-            // if (!is_null($shortlisted)) {
-            //     if ($shortlisted == 'true') {
-            //         $query->whereHas('shortlist');
-            //     } elseif ($shortlisted == 'false') {
-            //         $query->whereDoesntHave('shortlist');
-            //     }
-            // }
-
-            // if (!is_null($salaryRange)) {
-            //     $query->where(function ($q) use ($salaryRange) {
-            //         $q->whereNull('rate')
-            //             ->orWhereBetween('rate', [0, $salaryRange]);
-            //     });
-            // }
 
             $query->orderBy('posts.created_at', 'desc');
             return PostResource::collection($this->paginated($query, $request));
