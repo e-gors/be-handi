@@ -295,4 +295,24 @@ class ProposalController extends Controller
             return $e;
         }
     }
+
+    public function cancel(Bid $proposal)
+    {
+        $user = auth()->user();
+        if ($proposal) {
+            $proposal->update([
+                'status' => 'withdrawn'
+            ]);
+            return response()->json([
+                'code' => 200,
+                'message' => "Proposal has been updated successfully!",
+                'user' => new WorkerResource($user)
+            ]);
+        } else {
+            return response()->json([
+                'code' => 404,
+                'message' => "Proposal not found!"
+            ]);
+        }
+    }
 }

@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Skill;
+use Exception;
 use App\Profile;
+use App\Category;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ClientResource;
-use App\Http\Resources\ContractorResource;
 use App\Http\Resources\WorkerResource;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\ContractorResource;
 
 class ProfileController extends Controller
 {
@@ -423,5 +426,76 @@ class ProfileController extends Controller
             'message' => "Your email has been updated!",
             'user' => $user->role === "Client" ? new ClientResource($user) : new WorkerResource($user)
         ]);
+    }
+
+    public function updateCategories(Request $request)
+    {
+        try {
+            $auth = auth()->user();
+            $user = User::find($auth->id);
+
+            $categories = $request->job_categories;
+            $subCategories = $request->selected_jobs;
+            $categoryIds = Category::whereIn('name', $categories)->whereNull('parent_id')->pluck('id')->toArray();
+            $subCategoryIds = Category::whereIn('name', $subCategories)->whereNotNull('parent_id')->pluck('id')->toArray();
+
+            $this->attachCategoriesToUser($user, $categoryIds, $subCategoryIds);
+
+            return response()->json([
+                'code' => 200,
+                'message' => "Categories successfully updated!",
+                'user' => new WorkerResource($user)
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'code' => 500,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function updateSkills(Request $request)
+    {
+        try {
+            $auth = auth()->user();
+            $user = User::find($auth->id);
+
+            $categories = $request->job_categories;
+            $skills = $request->selected_skills;
+
+            $SkillCategoryIds = Skill::whereIn('name', $categories)->whereNull('parent_id')->pluck('id')->toArray();
+            $skillSubCategoryIds = Skill::whereIn('name', $skills)->whereNotNull('parent_id')->pluck('id')->toArray();
+
+            $this->attachSkillsToUser($user, $SkillCategoryIds, $skillSubCategoryIds);
+
+            return response()->json([
+                'code' => 200,
+                'message' => "Categories successfully updated!",
+                'user' => new WorkerResource($user)
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'code' => 500,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    // Update categories for user
+    public function attachCategoriesToUser($user, $categoryIds, $subCategoryIds)
+    {
+        $categories = Category::whereIn('id', $categoryIds)->get();
+        $subCategories = Category::whereIn('id', $subCategoryIds)->get();
+
+        $user->categories()->sync($categories->pluck('id')->concat($subCategories->pluck('id')));
+    }
+
+    // Update skills for user
+    public function attachSkillsToUser($user, $skillCategoryIds, $skillSubCategoryIds)
+    {
+        $skills = Skill::whereIn('id', $skillCategoryIds)->get();
+        $subSkills = Skill::whereIn('id', $skillSubCategoryIds)->get();
+
+        $user->skills()->sync($skills->pluck('id')->concat($subSkills->pluck('id')));
     }
 }

@@ -67,6 +67,8 @@ class WorkerResource extends JsonResource
             'contracts' => $this->contracts ? ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get()) : null,
             'ratings' => $this->ratings ? RatingResource::collection(Rating::where('worker_id', $this->id)->get()) : null,
             'tracker' => $this->tracker ? new TrackerResource($this->tracker) : null,
+            'experience' => new WorkExperienceResource($this->workExperience),
+            'completed' => $this->contracts ? $this->contracts->where('status', 'completed')->count() : 0
         ];
     }
 }

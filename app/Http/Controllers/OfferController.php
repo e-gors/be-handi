@@ -7,15 +7,14 @@ use App\Post;
 use App\Offer;
 use Exception;
 use App\Contract;
-use App\Schedule;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\OfferResource;
+use App\Http\Resources\ClientResource;
 use App\Http\Resources\WorkerResource;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class OfferController extends Controller
 {
@@ -171,6 +170,26 @@ class OfferController extends Controller
                 'code' => 200,
                 'message' => 'You successfully decline offer!',
                 'user' => new WorkerResource($user)
+            ]);
+        } else {
+            return response()->json([
+                'code' => 404,
+                'message' => 'Offer not found!',
+            ]);
+        }
+    }
+    public function withdraw(Offer $offer)
+    {
+        $user = auth()->user();
+        if ($offer) {
+            $offer->update([
+                'status' => 'withdrawn'
+            ]);
+
+            return response()->json([
+                'code' => 200,
+                'message' => 'You successfully withdraw offer!',
+                'user' => $user->role === "Client" ? new ClientResource($user) : new WorkerResource($user)
             ]);
         } else {
             return response()->json([

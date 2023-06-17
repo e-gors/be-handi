@@ -51,11 +51,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('proposals', 'ProposalController@index');
     Route::get('user/proposals', 'ProposalController@userBids');
     Route::post('choose/proposal/{proposal}/{post}', 'ProposalController@choose');
+    Route::post('proposal/cancel/{proposal}', 'ProposalController@cancel');
 
     //offers
     Route::get('offers', 'OfferController@index');
     Route::post('offer/accept/{offer}', 'OfferController@accept');
     Route::post('offer/cancel/{offer}', 'OfferController@cancel');
+    Route::post('offer/withdraw/{offer}', 'OfferController@withdraw');
     Route::post('new/job-offer', 'OfferController@store');
 
     //profiles
@@ -73,6 +75,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('account/update/email', 'ProfileController@updateEmail');
     Route::post('account/update/phone', 'ProfileController@updatePhone');
     Route::post('account/update/address', 'ProfileController@upateAddress');
+    Route::post('categories/update', 'ProfileController@updateCategories');
+    Route::post('skills/update', 'ProfileController@updateSkills');
 
     //ratings and reviews
     Route::post('new/rating/{worker}', 'RatingController@store');
@@ -88,7 +92,11 @@ Route::middleware('auth:api')->group(function () {
 
 
     //addmin
-    Route::get('admin/users','AdminController@users');
-    Route::get('job_post','JobPostController@jobPost');
+    Route::get('admin/users', 'AdminController@users');
+    Route::get('job_post', 'JobPostController@jobPost');
     // Route::get('contracts','ContractController@Contracts');
+
+    //worker work experience
+    Route::post('experience/add', 'WorkExperienceController@store');
+    Route::post('experience/update/{experience}', 'WorkExperienceController@update');
 });

@@ -85,7 +85,7 @@ class UserController extends Controller
 
         return $baseUsername . $suffix;
     }
-    private function attachCategoriesToUser($user, $categoryIds, $subCategoryIds)
+    public function attachCategoriesToUser($user, $categoryIds, $subCategoryIds)
     {
         foreach ($categoryIds as $categoryId) {
             $category = Category::findOrFail($categoryId);
@@ -102,7 +102,7 @@ class UserController extends Controller
             }
         }
     }
-    private function attachSkillsToUser($user, $SkillCategoryIds, $skillSubCategoryIds)
+    public function attachSkillsToUser($user, $SkillCategoryIds, $skillSubCategoryIds)
     {
         foreach ($SkillCategoryIds as $skillCategoryId) {
             $skill = Skill::findOrFail($skillCategoryId);

@@ -108,6 +108,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Tracker::class);
     }
 
+    public function workExperience()
+    {
+        return $this->hasOne(workExperience::class);
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -124,6 +129,7 @@ class User extends Authenticatable implements MustVerifyEmail
             $user->ratings()->delete();
             $user->projects()->delete();
             $user->tracker()->delete();
+            $user->workExperience()->delete();
             $user->deleteRelatedFiles();
             $user->deleteRelatedRecords();
         });
