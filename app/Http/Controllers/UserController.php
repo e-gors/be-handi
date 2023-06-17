@@ -88,7 +88,7 @@ class UserController extends Controller
     public function attachCategoriesToUser($user, $categoryIds, $subCategoryIds)
     {
         foreach ($categoryIds as $categoryId) {
-            $category =  ::findOrFail($categoryId);
+            $category = Category::findOrFail($categoryId);
 
             if ($category) {
                 $user->categories()->attach($category->id);
@@ -175,7 +175,7 @@ class UserController extends Controller
                         'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
                         'user' => new WorkerResource($newUser)
                     ]);
-                }else{
+                } else {
                     return response()->json([
                         'code' => 500,
                         'message' => 'This email is taken. Please use another email',
@@ -219,13 +219,12 @@ class UserController extends Controller
                         'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
                         'user' => new ClientResource($newUser)
                     ]);
-                }else{
+                } else {
                     return response()->json([
                         'code' => 500,
                         'message' => 'This email is taken. Please use another email'
                     ]);
                 }
-               
             }
         } catch (Exception $e) {
             DB::rollBack();
