@@ -3,7 +3,6 @@
 namespace App;
 
 use App\ShortList;
-use Illuminate\Support\Carbon;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -110,7 +109,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function workExperience()
     {
-        return $this->hasOne(workExperience::class);
+        return $this->hasOne(WorkExperience::class);
     }
 
     protected static function boot()

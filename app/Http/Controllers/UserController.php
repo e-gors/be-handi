@@ -88,7 +88,7 @@ class UserController extends Controller
     public function attachCategoriesToUser($user, $categoryIds, $subCategoryIds)
     {
         foreach ($categoryIds as $categoryId) {
-            $category = Category::findOrFail($categoryId);
+            $category =  ::findOrFail($categoryId);
 
             if ($category) {
                 $user->categories()->attach($category->id);
