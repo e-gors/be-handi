@@ -175,11 +175,12 @@ class UserController extends Controller
                         'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
                         'user' => new WorkerResource($newUser)
                     ]);
+                }else{
+                    return response()->json([
+                        'code' => 500,
+                        'message' => 'This email is taken. Please use another email',
+                    ]);
                 }
-                return response()->json([
-                    'code' => 500,
-                    'message' => 'This email is taken. Please use another email',
-                ]);
             } else {
                 $user = User::where('email', $request->email)->first();
                 $username = $this->generateUniqueUsername($request->first_name, $request->last_name);
@@ -218,15 +219,17 @@ class UserController extends Controller
                         'expires_in' => $token->token->expires_at->diffInSeconds(Carbon::now()),
                         'user' => new ClientResource($newUser)
                     ]);
+                }else{
+                    return response()->json([
+                        'code' => 500,
+                        'message' => 'This email is taken. Please use another email'
+                    ]);
                 }
-                return response()->json([
-                    'code' => 500,
-                    'message' => 'This email is taken. Please use another email'
-                ]);
+               
             }
         } catch (Exception $e) {
             DB::rollBack();
-            return $e;
+            return $e->getMessage();
         }
     }
 
