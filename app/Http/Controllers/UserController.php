@@ -43,7 +43,7 @@ class UserController extends Controller
                 ]);
             }
         } catch (Exception $e) {
-            throw $e;
+            return $e->getMessage();
         }
     }
     public function getUser()
