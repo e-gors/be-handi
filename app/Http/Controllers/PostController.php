@@ -171,6 +171,7 @@ class PostController extends Controller
             $category = $request->category ? $request->category : null;
             $location = $request->location ? $request->location : null;
             $skill = $request->skill ? $request->skill : null;
+            $status = $request->status ? $request->status : null;
             $salaryRange = $request->salary_range ? $request->salary_range : null;
             $type = $request->type ? $request->type : null;
             // $shortlisted = $request->shortlisted ? $request->shortlisted : null;
@@ -178,34 +179,30 @@ class PostController extends Controller
             $query = Post::query();
             $query->where('user_id', $user->id);
             $query->where('status', 'posted');
-
-            if (!is_null($search)) {
-                $query->join('users', 'posts.user_id', '=', 'users.id')
-                    ->where(function ($query) use ($search) {
-                        $query->where('users.first_name', 'LIKE', "%$search%")
-                            ->orWhere('users.last_name', 'LIKE', "%$search%")
-                            ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%")
-                            ->orWhere('posts.position', 'LIKE', "%$search%")
-                            ->orWhere('posts.skills', 'LIKE', '%' . $search . '%');
-                    });
-            }
+            $query->where('job_type', $type);
 
             if (!is_null($category)) {
                 $query->where('position', $category);
             }
-
             if (!is_null($location)) {
                 $query->where('locations', 'LIKE', '%' . $location . '%');
             }
-
             if (!is_null($skill)) {
                 $query->where('skills', 'LIKE', '%' . $skill . '%');
             }
-            if (!is_null($type)) {
-                $query->where('job_type', $type);
+            if (!is_null($status)) {
+                $query->where('status', $status);
+            }
+            if (!is_null($search)) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('title', 'LIKE', "%$search%")
+                        ->orWhere('position', 'LIKE', "%$search%")
+                        ->orWhere('locations', 'LIKE', '%' . $search . '%');
+                });
             }
 
             $query->orderBy('posts.created_at', 'desc');
+
             return PostResource::collection($this->paginated($query, $request));
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

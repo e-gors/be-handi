@@ -17,6 +17,18 @@ class ClientResource extends JsonResource
      */
     public function toArray($request)
     {
+        $id = $this->id;
+
+        $contracts = Contract::whereHas('post.user', function ($query) use ($id) {
+            $query->where('id', $id);
+        })->orWhereHas('bid.user', function ($query) use ($id) {
+            $query->where('id', $id);
+        })->orWhereHas('offer', function ($query) use ($id) {
+            $query->whereHas('user', function ($query) use ($id) {
+                $query->where('id', $id);
+            });
+        })->get();
+
         return [
             'id' => $this->id,
             'uuid' => $this->uuid,
@@ -31,8 +43,8 @@ class ClientResource extends JsonResource
             'profile' => ProfileResource::collection(Profile::where('user_id', $this->id)->get()),
             'shortlists' => $this->shortlists ? ShortlistResource::collection($this->shortlists) : null,
             'offers' => $this->offers ? OfferResource::collection(Offer::where('user_id', $this->id)->get()) : null,
-            'jobs' => $this->posts ? $this->posts->where('status', 'posted')->all() : null,
-            'contracts' => ContractResource::collection(Contract::with(['post.user', 'bid.user', 'offer.user'])->get())
+            'jobs' => $this->posts ? PostResource::collection($this->posts->where('status', 'posted')->all()) : null,
+            'contracts' => ContractResource::collection($contracts)
         ];
     }
 }

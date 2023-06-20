@@ -24,7 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('tasks:check')->twiceDaily(8, 20);
+        $schedule->command('tasks:check')->timezone('Asia/Manila')
+            ->everyMinute();
     }
 
     /**

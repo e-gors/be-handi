@@ -23,17 +23,30 @@ class ContractController extends Controller
 
             $user = auth()->user();
             $query = Contract::query();
-            $query->where('status', 'in progress');
 
             if ($type) {
                 if ($type !== 'all') {
-                    $query->whereHas('post', function ($query) use ($type) {
+                    $query->whereHas('post', function ($query) use ($type, $user) {
                         $query->where('job_type', $type);
-                    })->orWhereHas('offer', function ($query) use ($type) {
-                        $query->where('type', $type);
                     });
                 }
             }
+
+            if ($user->role === 'Client') {
+                $query->whereHas('post', function ($query) use ($type, $user) {
+                    $query->where('user_id', $user->id);
+                });
+            } else {
+                $query->where(function ($query) use ($user) {
+                    $query->whereHas('bid', function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    })->orWhereHas('offer', function ($query) use ($user) {
+                        $query->join('users', 'offers.profile_id', '=', 'users.id')
+                            ->where('users.id', $user->id);
+                    });
+                });
+            }
+
             if ($status) {
                 $query->where('status', $status);
             }
@@ -46,36 +59,38 @@ class ContractController extends Controller
                 $query->orderBy('created_at', $orderByDate === 'asc' ? 'asc' : 'desc');
             }
 
-            $query->with(['post.user', 'bid.user', 'offer.user']);
-
-            $query->where(function ($query) use ($user, $search) {
-                $query->whereHas('post.user', function ($query) use ($user, $search) {
-                    $query->where('id', $user->id)
-                        ->where('first_name', 'LIKE', "%$search%")
-                        ->orWhere('last_name', 'LIKE', "%$search%")
-                        ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
-                })
-                    ->orWhereHas('bid.user', function ($query) use ($user, $search) {
-                        $query->where('id', $user->id)
-                            ->where('first_name', 'LIKE', "%$search%")
-                            ->orWhere('last_name', 'LIKE', "%$search%")
-                            ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
+            if (!is_null($search)) {
+                $query->where(function ($query) use ($search) {
+                    $query->where(function ($query) use ($search) {
+                        $query->whereHas('post.user', function ($query) use ($search) {
+                            $query->where(function ($query) use ($search) {
+                                $query->where('users.first_name', 'LIKE', "%$search%")
+                                    ->orWhere('users.last_name', 'LIKE', "%$search%")
+                                    ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                            });
+                        });
                     })
-                    ->orWhereHas('offer.user', function ($query) use ($user, $search) {
-                        $query->where('id', $user->id)
-                            ->where('first_name', 'LIKE', "%$search%")
-                            ->orWhere('last_name', 'LIKE', "%$search%")
-                            ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
-                    });
-            })
-                ->orWhereHas('offer', function ($query) use ($user, $search) {
-                    $query->whereHas('user', function ($query) use ($user, $search) {
-                        $query->where('id', $user->id)
-                            ->where('first_name', 'LIKE', "%$search%")
-                            ->orWhere('last_name', 'LIKE', "%$search%")
-                            ->orWhere(DB::raw("CONCAT(first_name, ' ', last_name)"), 'LIKE', "%$search%");
-                    });
+                        ->orWhere(function ($query) use ($search) {
+                            $query->whereHas('bid.user', function ($query) use ($search) {
+                                $query->where(function ($query) use ($search) {
+                                    $query->where('users.first_name', 'LIKE', "%$search%")
+                                        ->orWhere('users.last_name', 'LIKE', "%$search%")
+                                        ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                                });
+                            });
+                        })
+                        ->orWhereHas('offer.worker', function ($query) use ($search) {
+                            $query->where(function ($query) use ($search) {
+                                $query->where('users.first_name', 'LIKE', "%$search%")
+                                    ->orWhere('users.last_name', 'LIKE', "%$search%")
+                                    ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                            });
+                        });
+                })->orWhereHas('post', function ($query) use ($search) {
+                    $query->where('title', 'LIKE', "%$search%")
+                        ->orWhere('position', 'LIKE', "%$search%");
                 });
+            }
 
 
             return ContractResource::collection($this->paginated($query, $request));

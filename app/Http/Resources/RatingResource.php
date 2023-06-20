@@ -3,7 +3,9 @@
 namespace App\Http\Resources;
 
 use App\User;
+use App\Contract;
 use Illuminate\Support\Carbon;
+use App\Http\Resources\ClientResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class RatingResource extends JsonResource
@@ -16,16 +18,19 @@ class RatingResource extends JsonResource
      */
     public function toArray($request)
     {
+
         // return parent::toArray($request);
 
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
+            'post_id' => $this->post_id,
             'worker_id' => $this->worker_id,
             'comment' => $this->comment,
             'rating' => $this->rating,
             'created_at' => $this->created_at->diffForHumans(),
             'client' => new ClientResource(User::find($this->user_id)),
+            'post' => $this->post,
             'rating_count_w' => $this->where('created_at', '>=', Carbon::now()->startOfWeek())->sum('rating'),
             'rating_count_m' => $this->where('created_at', '>=', Carbon::now()->startOfMonth())->sum('rating'),
         ];

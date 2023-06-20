@@ -24,7 +24,6 @@ Route::get('skills/children', 'SkillController@children');
 Route::get('jobs', 'PostController@index');
 Route::get('locations', 'LocationController@index');
 Route::get('worker/{uuid}', 'ProfileController@filteredWorker');
-Route::get('user/workers', 'ProfileController@index');
 // Route::post('/send/sms', 'Controller@sendSms');
 Route::get('reviews/{client}', 'RatingController@getReviews');
 Route::post('track/user/view/{uuid}', 'TrackerController@profileView');
@@ -33,10 +32,12 @@ Route::post('track/user/view/{uuid}', 'TrackerController@profileView');
 Route::middleware('auth:api')->group(function () {
     //users
     Route::get('get-user', 'UserController@getUser');
-    Route::post('new/shortlist/user/{id}', 'ShortlistController@addUserToShortlist');
+    Route::post('new/shortlist/user/{id}', 'ShortlistController@addWorkerToShortlist');
+    Route::delete('remove/shortlist/user/{id}', 'ShortlistController@removeWorkerFromShortlist');
     Route::get('verify-email/{id}', 'UserController@confirmedUser');
     Route::post('account/update/password', 'UserController@updatePassword');
     Route::delete('account/terminate', 'UserController@destroy');
+    Route::get('user/workers', 'ProfileController@index');
 
     //jobs
     Route::post('new/job-post', 'PostController@post');

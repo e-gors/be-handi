@@ -17,16 +17,16 @@ class Contract extends Model
 
     public function post()
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Post::class)->with('user');
     }
 
     public function bid()
     {
-        return $this->belongsTo(Bid::class);
+        return $this->belongsTo(Bid::class)->with('user');
     }
 
     public function offer()
     {
-        return $this->belongsTo(Offer::class);
+        return $this->belongsTo(Offer::class)->with('user');
     }
 }

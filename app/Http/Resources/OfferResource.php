@@ -20,18 +20,11 @@ class OfferResource extends JsonResource
             'user_id' => $this->user_id,
             'profile_id' => $this->profile_id,
             'post_id' => $this->post_id,
-            'post' => $this->post,
-            'title' => $this->title,
-            'type' => $this->type,
-            'days' => $this->days,
-            'rate' => $this->rate,
-            'budget' => $this->budget,
-            'instructions' => $this->instructions,
-            'images' => unserialize($this->images),
             'status' => $this->status,
             'created_at' => $this->created_at->diffForHumans(),
+            'job' => $this->post,
             'worker' => User::find($this->profile_id),
-            'client' => User::find($this->user_id)
+            'client' => $this->user,
         ];
     }
 }

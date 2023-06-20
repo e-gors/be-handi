@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\User;
+use App\Profile;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PostResource extends JsonResource
@@ -35,7 +36,8 @@ class PostResource extends JsonResource
             'questions' => $this->questions ? unserialize($this->questions) : null,
             'post_url' => $this->post_url,
             'status' => $this->status,
-            'client' => new ClientResource(User::find($this->user_id)),
+            'client' => $user,
+            'clientProfile' => $user->profile,
             'created_at' => $this->created_at->diffForHumans(),
             'total' => $user->posts->count(),
             'bids' => BidResource::collection($this->bids)

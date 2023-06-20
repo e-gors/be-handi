@@ -14,17 +14,17 @@ class ShortlistController extends Controller
 {
     public function addPostToShortlist($id)
     {
-        try{
+        try {
             $user = auth()->user();
             $post = Post::find($id);
-    
+
             if ($post) {
                 ShortList::create([
                     'user_id' => $user->id,
                     'post_id' => $post->id,
                     'favorite_type' => 'post',
                 ]);
-    
+
                 return response()->json([
                     'code' => 200,
                     'message' => "Post added to your shortlist!",
@@ -36,7 +36,7 @@ class ShortlistController extends Controller
                     'message' => "Post not found!",
                 ]);
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return $e;
         }
     }
@@ -47,7 +47,7 @@ class ShortlistController extends Controller
         $shortlist = Shortlist::where('user_id', $user->id)->where('post_id', $id)->delete();
         if (!$shortlist) {
             return response()->json([
-                'code' => 403,
+                'code' => 404,
                 'message' => 'This post is not in your shortlist!'
             ]);
         } else {
@@ -58,7 +58,7 @@ class ShortlistController extends Controller
             ]);
         }
     }
-    public function addUserToShortlist($id)
+    public function addWorkerToShortlist($id)
     {
         $authUser = auth()->user();
         $user = User::find($id);
@@ -73,12 +73,30 @@ class ShortlistController extends Controller
             return response()->json([
                 'code' => 200,
                 'message' => "User added to your shortlist!",
-                'user' => $user->role == "Worker" ? new WorkerResource($user) : new ClientResource($user)
+                'user' => new ClientResource($authUser)
             ]);
         } else {
             return response()->json([
                 'code' => 500,
-                'message' => "Post not found!",
+                'message' => "User not found!",
+            ]);
+        }
+    }
+    public function removeWorkerFromShortlist($id)
+    {
+        $user = auth()->user();
+
+        $shortlist = Shortlist::where('user_id', $user->id)->where('profile_id', $id)->delete();
+        if (!$shortlist) {
+            return response()->json([
+                'code' => 404,
+                'message' => 'This user is not in your shortlist!'
+            ]);
+        } else {
+            return response()->json([
+                'code' => 200,
+                'message' => "User removed in your shortlist",
+                'user' => new ClientResource($user)
             ]);
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Post;
 use App\User;
 use App\Skill;
 use Exception;
@@ -21,7 +22,9 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $workers = User::with(['profile', 'ratings'])->where('role', "Worker")->get();
+        $workers = User::with(['profile', 'ratings'])
+            ->where('role', 'Worker')
+            ->get();
 
         return ContractorResource::collection($workers);
     }

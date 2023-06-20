@@ -24,17 +24,11 @@ class ProposalController extends Controller
         $orderByRate = $request->order_by_rate ? $request->order_by_rate : null;
         $orderByDate = $request->order_by_date ? $request->order_by_date : null;
         $status = $request->status ? $request->status : null;
+        $type = $request->type ? $request->type : null;
 
         $query = Bid::query();
         $query->with('user', 'post');
 
-        if (!is_null($search)) {
-            $query->whereHas('post', function ($q) use ($search) {
-                $q->where('title', 'LIKE', "%$search%")
-                    ->orWhere('category', 'LIKE', "%$search%")
-                    ->orWhere('position', 'LIKE', "%$search%");
-            });
-        }
         if (!is_null($orderByRate)) {
             $query->orderBy('rate', $orderByRate);
         }
@@ -44,6 +38,20 @@ class ProposalController extends Controller
         if (!is_null($status)) {
             $query->where('status', $status);
         }
+        if (!is_null($type)) {
+            $query->whereHas('post', function ($q) use ($type) {
+                $q->where('job_type', $type);
+            });
+        }
+
+        if (!is_null($search)) {
+            $query->whereHas('post', function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%$search%")
+                    ->orWhere('category', 'LIKE', "%$search%")
+                    ->orWhere('position', 'LIKE', "%$search%");
+            });
+        }
+
         $query->get();
 
         return BidResource::collection($this->paginated($query, $request));
@@ -55,20 +63,13 @@ class ProposalController extends Controller
         $orderByRate = $request->order_by_rate ? $request->order_by_rate : null;
         $orderByDate = $request->order_by_date ? $request->order_by_date : null;
         $status = $request->status ? $request->status : null;
+        $type = $request->type ? $request->type : null;
 
         $user = auth()->user();
 
         $query = Bid::query();
         $query->with('user', 'post');
         $query->where('user_id', $user->id);
-
-        if (!is_null($search)) {
-            $query->whereHas('post', function ($q) use ($search) {
-                $q->where('title', 'LIKE', "%$search%")
-                    ->orWhere('category', 'LIKE', "%$search%")
-                    ->orWhere('position', 'LIKE', "%$search%");
-            });
-        }
         if (!is_null($orderByRate)) {
             $query->orderBy('rate', $orderByRate);
         }
@@ -78,6 +79,19 @@ class ProposalController extends Controller
         if (!is_null($status)) {
             $query->where('status', $status);
         }
+        if (!is_null($type)) {
+            $query->whereHas('post', function ($q) use ($type) {
+                $q->where('job_type', $type);
+            });
+        }
+        if (!is_null($search)) {
+            $query->whereHas('post', function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%$search%")
+                    ->orWhere('category', 'LIKE', "%$search%")
+                    ->orWhere('position', 'LIKE', "%$search%");
+            });
+        }
+
         $query->get();
 
         return BidResource::collection($this->paginated($query, $request));

@@ -27,26 +27,47 @@ class OfferController extends Controller
         $user = auth()->user();
         $query = Offer::query();
 
-        if ($user->role === 'Client') {
-            $query->where('user_id', $user->id);
-        } else {
-            $query->where('profile_id', $user->id);
-        }
-
-        if (!is_null($search)) {
-            $query->join('users', 'offers.user_id', '=', 'users.id')
-                ->where(function ($query) use ($search) {
-                    $query->where('users.first_name', 'LIKE', "%$search%")
-                        ->orWhere('users.last_name', 'LIKE', "%$search%")
-                        ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
-                });
-        }
+        $query->with(['user', 'post']);
 
         if (!is_null($status)) {
             $query->where('status', $status);
         }
         if (!is_null($type)) {
-            $query->where('type', $type);
+            $query->whereHas('post', function ($query) use ($type) {
+                $query->where('job_type', $type);
+            });
+        }
+
+        if ($user->role === 'Client') {
+            $query->where('user_id', $user->id);
+
+            if (!is_null($search)) {
+                $query->join('users', 'offers.profile_id', '=', 'users.id')
+                    ->where(function ($query) use ($search) {
+                        $query->where('users.first_name', 'LIKE', "%$search%")
+                            ->orWhere('users.last_name', 'LIKE', "%$search%")
+                            ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                    })
+                    ->orWhereHas('post', function ($query) use ($search) {
+                        $query->where('title', 'LIKE', "%$search%")
+                            ->orWhere('position', 'LIKE', "%$search%");
+                    });
+            }
+        } else {
+            $query->where('profile_id', $user->id);
+
+            if (!is_null($search)) {
+                $query->join('users', 'offers.user_id', '=', 'users.id')
+                    ->where(function ($query) use ($search) {
+                        $query->where('users.first_name', 'LIKE', "%$search%")
+                            ->orWhere('users.last_name', 'LIKE', "%$search%")
+                            ->orWhere(DB::raw("CONCAT(users.first_name, ' ', users.last_name)"), 'LIKE', "%$search%");
+                    })
+                    ->orWhereHas('post', function ($query) use ($search) {
+                        $query->where('title', 'LIKE', "%$search%")
+                            ->orWhere('position', 'LIKE', "%$search%");
+                    });
+            }
         }
 
         return OfferResource::collection($this->paginated($query, $request));
@@ -56,10 +77,8 @@ class OfferController extends Controller
     {
         try {
             $user = auth()->user();
-            $formValues = json_decode($request->formValues);
-            $images = $request->file('images') ? $request->file('images') : null;
-            $instruction = $request->instruction ? $request->instruction : null;
             $worker = $request->worker ? json_decode($request->worker) : null;
+            $job = $request->job ? json_decode($request->job) : null;
 
             if (empty($worker)) {
                 return response()->json([
@@ -68,41 +87,20 @@ class OfferController extends Controller
                 ]);
             }
 
-            $imageUrls = [];
+            $hasOffer = Offer::where('user_id', $user->id)
+                ->where('profile_id', $worker[0]->id)
+                ->where('post_id', $job[0]->id)->first();
 
-            if (!empty($images)) {
-                foreach ($images as $image) {
-                    $filename = "offer_img" . "_" . time() . '_' . Str::random(10) . "." . $image->getClientOriginalExtension();
-                    if (!Storage::disk('local')->exists('/offers')) {
-                        Storage::disk('local')->makeDirectory('/offers');
-                    }
-                    $image->storeAs('public/offers', $filename);
-                    $imageUrl = asset('storage/offers/' . $filename);
-
-                    $imageUrls[] = [
-                        'url' => $imageUrl,
-                    ];
-                }
+            if ($hasOffer) {
+                return response()->json([
+                    'code' => 500,
+                    'message' => "You already have sent offer to this user with the job you choose!"
+                ]);
             }
-
-            $post = Post::find($formValues[0]->post);
-
-            if (isset($formValues[0]->rate)) {
-                $removedComma = str_replace(',', '', $formValues[0]->rate);
-            } else {
-                $removedComma = str_replace(',', '', $formValues[0]->budget);
-            }
-
             $newOffer = Offer::create([
                 'user_id' => $user->id,
                 'profile_id' => $worker[0]->id,
-                'post_id' => $formValues[0]->post ? $formValues[0]->post : null,
-                'type' => $formValues[0]->type,
-                'days' => isset($formValues[0]->days) ? $formValues[0]->days : null,
-                'rate' => isset($formValues[0]->rate) ? $removedComma : null,
-                'budget' => isset($formValues[0]->budget) ? $removedComma : null,
-                'instructions' => isset($instruction) ? $instruction : null,
-                'images' => isset($images) ? serialize($imageUrls) : null,
+                'post_id' => $job[0]->id,
             ]);
 
             if (!$newOffer) {
@@ -129,6 +127,16 @@ class OfferController extends Controller
         $post = Post::find($offer->post_id);
         $bid = $post ? Bid::find($post->bid_id) : null;
 
+        if ($post->status === 'contracted') {
+            return response()->json([
+                'code' => 500,
+                'message' => "I'm sorry but this offer is already in contract mode!"
+            ]);
+
+            $offer->update([
+                'status' => "Expired"
+            ]);
+        }
         $days = "21-30 days";
         $startDay = Carbon::parse('next monday')->startOfWeek(); // Start date as next Monday
         $dayRange = explode('-', $days);
@@ -147,6 +155,14 @@ class OfferController extends Controller
             'start_date' => $startDateString,
             'end_date' => $endDateString,
             'status' => 'in progress'
+        ]);
+
+        $offer->update([
+            'status' => 'accepted'
+        ]);
+
+        $post->update([
+            'status' => 'contracted'
         ]);
 
         if ($newContracts) {

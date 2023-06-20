@@ -18,13 +18,7 @@ class CreateOffersTable extends Migration
             $table->foreignId('user_id'); //owner of the offer
             $table->foreignId('profile_id'); // invited worker
             $table->foreignId('post_id')->nullable();
-            $table->string('type');
-            $table->string('days')->nullable();
-            $table->decimal('rate', 8, 2)->nullable();
-            $table->decimal('budget', 12, 2)->nullable();
-            $table->text('instructions')->nullable();
-            $table->text('images')->nullable();
-            $table->enum('status', ['pending', 'accepted', 'declined', 'withdrawn'])->default('pending');
+            $table->enum('status', ['pending', 'accepted', 'declined', 'withdrawn', 'Expired'])->default('pending');
             $table->timestamps();
             $table->softDeletes();
         });

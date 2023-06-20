@@ -14,37 +14,34 @@ class RatingController extends Controller
     public function store(Request $request, User $worker)
     {
         try {
+
             $user = auth()->user();
+            $job = $request->contract;
 
+            $rated = Rating::where('user_id', $user->id)
+                ->where('worker_id', $worker->id)
+                ->where('post_id', $job['post']['id'])
+                ->exists();
+
+            if ($rated) {
+                return response()->json([
+                    'code' => 500,
+                    'message' => 'You already submit a rating for this contract!'
+                ]);
+            }
             // Check if the user and worker have a completed contract
-            $query = Contract::query();
-            $query->where('status', 'completed');
-
-            $query->with(['post.user', 'bid.user', 'offer.user']);
-
-            $query->where(function ($query) use ($user, $worker) {
-                $query->whereHas('post', function ($query) use ($user, $worker) {
-                    $query->where('user_id', $user->id)
-                        ->whereHas('bids', function ($query) use ($worker) {
-                            $query->where('user_id', $worker->id);
-                        });
-                });
-            })
-                ->orWhereHas('offer', function ($query) use ($user, $worker) {
-                    $query->where('profile_id', $worker->id)
-                        ->where('user_id', $user->id);
-                });
-
-            if (!$query->exists()) {
+            if ($job['status'] !== 'completed') {
                 return response()->json([
                     'code' => 400,
                     'message' => 'You cannot submit a review without a completed contract.'
                 ]);
             }
 
-            Rating::create([
+            Rating::firstOrCreate([
                 'user_id' => $user->id,
+                'post_id' => $job['post']['id'],
                 'worker_id' => $worker->id,
+            ], [
                 'comment' => $request->comment,
                 'rating' => $request->rating,
             ]);
