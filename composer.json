@@ -16,7 +16,7 @@
         "laravel/framework": "^8.0",
         "laravel/passport": "^10.0",
         "laravel/tinker": "^2.5",
-        "pusher/pusher-php-server": "~4.0"
+        "munafio/chatify": "^1.6"
     },
     "require-dev": {
         "facade/ignition": "^2.0",
@@ -39,6 +39,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "App\\Models\\": "app/Models",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
