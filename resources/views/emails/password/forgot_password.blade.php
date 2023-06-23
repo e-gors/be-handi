@@ -1,6 +1,7 @@
 @component('mail::message')
-# Helo $user->first_name,
+# Helo {{ $user->first_name }},
 
+You have request to reset your password on our system.
 Click on the button below to reset your password:
 
 @component('mail::button', ['url' => $link])

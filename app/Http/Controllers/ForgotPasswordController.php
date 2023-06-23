@@ -39,7 +39,7 @@ class ForgotPasswordController extends Controller
                 'expires_at' => $resetPasswordLinkExpiration,
             ]);
 
-            $resetUrl = env('APP_BASE_URL') .  '/reset-password/' . $token . '/' . $user->email;
+            $resetUrl = env('APP_BASE_URL') .  'reset-password/' . $token . '/' . $user->email;
             Mail::to($user->email)->send(new ForgotPasswordMail($user, $resetUrl));
 
             return response()->json([
