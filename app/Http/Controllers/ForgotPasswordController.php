@@ -18,13 +18,13 @@ class ForgotPasswordController extends Controller
         $user = User::where('email', $request->email)->first();
 
         $alreadySent = DB::table('password_resets')
-            ->where('email', $user->email)
+            ->where('email', $request->email)
             ->first();
 
         if ($alreadySent) {
             return response()->json([
                 'code' => 500,
-                'message' => "Sorry, We already sent the link to your email account. Please check you mail inbox!"
+                'message' => "Sorry, We already sent the link to your email account. Please check your mail inbox!"
             ]);
         }
 
