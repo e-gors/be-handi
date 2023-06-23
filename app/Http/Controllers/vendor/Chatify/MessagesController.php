@@ -233,7 +233,7 @@ class MessagesController extends Controller
             ->where('users.id', '!=', Auth::user()->id)
             ->select('users.*', DB::raw('MAX(ch_messages.created_at) max_created_at'))
             ->orderBy('max_created_at', 'desc')
-            ->groupBy('users.id')
+            ->groupBy('users.id', 'users.uuid')
             ->paginate($request->per_page ?? $this->perPage);
 
         $usersList = $users->items();
