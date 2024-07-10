@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class NewProposalMail extends Mailable
+class AccepOffer extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -28,6 +28,6 @@ class NewProposalMail extends Mailable
      */
     public function build()
     {
-        return $this->view('view.name');
+        return $this->markdown('emails.notifications.acceptOffer');
     }
 }

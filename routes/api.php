@@ -28,6 +28,11 @@ Route::get('worker/{uuid}', 'ProfileController@filteredWorker');
 Route::get('reviews/{client}', 'RatingController@getReviews');
 Route::post('track/user/view/{uuid}', 'TrackerController@profileView');
 
+//rest password
+Route::post('/reset-password/{token}/{email}', 'ForgotPasswordController@resetPassword')
+    ->name('password.reset');
+Route::post('/forgot-password', 'ForgotPasswordController@sendResetLinkEmail');
+
 //Private Routes
 Route::middleware('auth:api')->group(function () {
     //users
